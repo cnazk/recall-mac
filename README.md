@@ -328,11 +328,15 @@ and workflows, one-time codes, and the polish pass. Phase 7 — shipping — is 
 
 ### Known limits
 
-- **No download yet**, for the reasons above.
-- **The Accessibility grant is lost on update**, same cause.
-- **No Persian OCR** — macOS Vision has no `fa` recogniser. Arabic-script *search* is
-  folded and works; recognition is the gap.
-- **Shortcodes cannot expand in password fields**, by design and not fixable.
+Stated up front, with what happens next. Two of these are being fixed; two are not ours
+to fix, and saying so is more useful than a promise that never lands.
+
+| Limit | Status |
+| --- | --- |
+| **No download yet** — builds are ad-hoc signed and Gatekeeper refuses them | **Being fixed.** Developer ID signing and notarisation are the next shipping milestone; the release pipeline is already built and waiting for the certificate. |
+| **The Accessibility grant is lost on every update** — an ad-hoc signature is pinned to the build hash, so macOS sees each build as a different app | **Fixed by the same change.** A Developer ID signature is stable across versions, and the grant survives. |
+| **No Persian OCR** — macOS Vision ships no `fa` recogniser | **Not ours to fix.** Automatic language detection is on, and Arabic-script *search* is folded so Persian text you paste is findable. Recognition waits on Apple. |
+| **Shortcodes do not expand in password fields** | **Working as intended.** macOS enables Secure Event Input there, which blocks the event tap Recall listens on. That is the OS protecting you from exactly the class of software Recall is, and Recall will not work around it. |
 
 ---
 
