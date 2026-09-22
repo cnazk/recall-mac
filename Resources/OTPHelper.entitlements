@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  The helper is sandboxed even though Recall itself cannot be (ADR 0003). That
+	  asymmetry is the point: the process holding the 2FA seeds gives up everything it
+	  does not need — no network, no files, no Accessibility, no pasteboard.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<false/>
+	<key>com.apple.security.network.server</key>
+	<false/>
+	<key>com.apple.security.files.user-selected.read-only</key>
+	<false/>
+	<key>com.apple.security.device.camera</key>
+	<false/>
+</dict>
+</plist>
