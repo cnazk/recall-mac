@@ -119,10 +119,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             settings.storageMode = .inMemory
             Log.ui.info("Forced in-memory storage for this run")
         }
+        // `--demo-store` is for recording: a throwaway history that is still disk-backed.
+        // Not a `StorageMode` case, because that enum is a persisted user setting and this
+        // is a switch for one run.
+        let demo = CommandLine.arguments.contains("--demo-store")
+        if demo {
+            Log.ui.info("Using a throwaway demo store for this run")
+        }
         let watchdog = startWatchdog()
 
         do {
-            let opened = try await Self.openStore(mode: settings.storageMode)
+            let opened = try await Self.openStore(mode: settings.storageMode, demo: demo)
 
             watchdog.cancel()
             finishLaunching(opened: opened, settings: settings, settingsController: settingsController)
@@ -150,10 +157,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// allowed to block.
     private static let storeQueue = DispatchQueue(label: "com.recall.store-open", qos: .userInitiated)
 
-    private static func openStore(mode: StorageMode) async throws -> OpenedStore {
+    private static func openStore(mode: StorageMode, demo: Bool = false) async throws -> OpenedStore {
         try await withCheckedThrowingContinuation { continuation in
             storeQueue.async {
                 do {
+                    if demo {
+                        // A temporary database with an ephemeral key: real history is not
+                        // touched, the Keychain is not consulted, and it goes away with the
+                        // temporary directory.
+                        //
+                        // Deliberately *not* `.inMemory`, which looks like the obvious
+                        // choice for a throwaway run and is a trap: `SemanticSearch` is only
+                        // built when there is a `SQLiteHistoryStore`, so in-memory mode
+                        // silently downgrades search to literal matching — with no warning
+                        // anywhere, which cost a demo recording to find.
+                        let sqlite = try SQLiteHistoryStore(url: nil, keyStore: EphemeralKeyStore())
+                        continuation.resume(returning: OpenedStore(store: sqlite, sqlite: sqlite))
+                        return
+                    }
                     switch mode {
                     case .persistent:
                         let sqlite = try SQLiteHistoryStore(url: try SQLiteHistoryStore.defaultURL())
@@ -204,6 +225,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 provider: provider,
                 expander: LanguageModelQueryExpander()
             )
+            Log.ui.info("Semantic search is on")
+        }
+
+        // Search silently degrading to literal matching is invisible from the outside: the
+        // panel still returns results, they are just worse. Say which of the three
+        // conditions failed, because guessing costs more than the line.
+        if semanticSearch == nil {
+            let reason: String
+            if opened.sqlite == nil {
+                reason = "no SQLite store (in-memory mode disables semantic search)"
+            } else if !settings.semanticSearchEnabled {
+                reason = "turned off in settings"
+            } else {
+                reason = "no embedding provider available"
+            }
+            Log.ui.info("Semantic search is OFF: \(reason, privacy: .public)")
         }
 
         let capture = CaptureService(settings: settings)
