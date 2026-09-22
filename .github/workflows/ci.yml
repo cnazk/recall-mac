@@ -14,9 +14,13 @@ concurrency:
 
 jobs:
   test:
-    # macos-26 is the Apple Silicon image, and the only one carrying Xcode 27. The package
-    # declares .macOS(.v26) and the app's LSMinimumSystemVersion is 26.0, so an older image
-    # cannot build this at all.
+    # macos-26 is the Apple Silicon image. Pinned rather than macos-latest so an image
+    # bump cannot silently change the toolchain under us.
+    #
+    # It ships Xcode 26.6 / Swift 6.3.3, not the Xcode 27 this is developed against, and
+    # the package builds and passes all 345 tests on it — verified, not assumed. The
+    # binding constraint is the package's .macOS(.v26) and the app's LSMinimumSystemVersion
+    # of 26.0, which rules out every older image.
     runs-on: macos-26
 
     steps:
@@ -50,7 +54,7 @@ jobs:
       - name: Package
         run: ditto -c -k --keepParent .build/Recall.app Recall.app.zip
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: Recall-${{ github.sha }}
           path: Recall.app.zip
