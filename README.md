@@ -5,6 +5,11 @@ A local-first, AI-integrated clipboard manager for macOS.
 Recall remembers everything you copy, lets you search it by *meaning* rather than by the
 exact words, and treats anything that looks like a credential as radioactive.
 
+![Recall's history panel: searching for "rounding" surfaces a CSS border-radius snippet that never contains the word](docs/demo.gif)
+
+Searching for **rounding** finds the `border-radius` snippet — a word that appears nowhere
+in it.
+
 - **Multi-format** — text, RTF, images, files, links and hex colours, each rendered as
   what it is.
 - **Semantic search** — look for "CSS rounding", find the `border-radius` snippet.
