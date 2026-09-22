@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release, e.g. v0.1.0"
+        required: true
+
+jobs:
+  release:
+    runs-on: macos-26
+    permissions:
+      # The only write this workflow needs: creating the release and attaching the zip.
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Toolchain
+        run: swift --version
+
+      # A release that has not been tested is not a release. Same suite as CI, on purpose:
+      # a tag can be pushed to a commit CI never ran on.
+      - name: Test
+        run: swift test
+
+      - name: Build the app bundle
+        run: ./Scripts/bundle.sh
+
+      - name: Verify the signature
+        run: codesign --verify --strict --verbose=2 .build/Recall.app
+
+      - name: Package
+        run: |
+          VERSION="${{ inputs.tag || github.ref_name }}"
+          ditto -c -k --keepParent .build/Recall.app "Recall-$VERSION.zip"
+          shasum -a 256 "Recall-$VERSION.zip" | tee checksum.txt
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ inputs.tag || github.ref_name }}"
+          SHA=$(cut -d' ' -f1 checksum.txt)
+          cat > notes.md <<NOTES
+          ## Install
+
+          **Build it from source.** That is the supported path, and it is one command:
+
+          \`\`\`bash
+          git clone https://github.com/${{ github.repository }}.git
+          cd recall-mac
+          ./Scripts/install.sh --build
+          \`\`\`
+
+          Requires macOS 26 or later and Xcode 27.
+
+          ## About the attached build
+
+          \`Recall-$VERSION.zip\` is signed **ad-hoc**, not with a Developer ID, because
+          this project does not yet have an Apple Developer Program membership. macOS
+          will refuse to open it after download, and the workaround — stripping the
+          quarantine flag by hand — is a bad habit to teach for an app that reads your
+          clipboard and asks for Accessibility. It is attached for people who want to
+          check the build reproduces, not as a recommended download.
+
+          An ad-hoc signature is also pinned to the build hash, so macOS treats every
+          release as a different application: the Accessibility grant and the encryption
+          key's Keychain access are lost on each update. Developer ID signing fixes both,
+          and is the next shipping milestone.
+
+          \`\`\`
+          SHA-256  $SHA
+          \`\`\`
+          NOTES
+          gh release create "$VERSION" \
+            --title "Recall $VERSION" \
+            --notes-file notes.md \
+            "Recall-$VERSION.zip"

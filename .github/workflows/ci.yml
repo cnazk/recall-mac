@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A second push to the same branch makes the first run pointless. macOS minutes bill at
+# ten times the Linux rate on a private repo, so cancelling is worth real money here.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    # macos-26 is the Apple Silicon image, and the only one carrying Xcode 27. The package
+    # declares .macOS(.v26) and the app's LSMinimumSystemVersion is 26.0, so an older image
+    # cannot build this at all.
+    runs-on: macos-26
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # Printed, not asserted. A version mismatch shows up as a compiler error that names
+      # the actual problem, which beats a guard failing on a string comparison.
+      - name: Toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+          sw_vers
+
+      - name: Build
+        run: swift build -c release --product recall-app
+
+      - name: Test
+        run: swift test
+
+      # The bundle step is the one that has historically broken without any test noticing:
+      # a missing resource bundle used to take the app down at launch. Assembling it on
+      # every push is the only thing that catches that.
+      - name: Assemble the app bundle
+        run: ./Scripts/bundle.sh
+
+      - name: Verify the signature
+        run: codesign --verify --strict --verbose=2 .build/Recall.app
+
+      # ditto, not upload-artifact's own zipping: a .app is a bundle, and the executable
+      # bit and the code signature have to survive the round trip.
+      - name: Package
+        run: ditto -c -k --keepParent .build/Recall.app Recall.app.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Recall-${{ github.sha }}
+          path: Recall.app.zip
+          retention-days: 14
