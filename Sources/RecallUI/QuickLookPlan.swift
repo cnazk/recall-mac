@@ -41,12 +41,12 @@ public enum QuickLookPlan: Equatable, Sendable {
     /// stripped of anything that could escape the directory it is written into.
     static func safeName(_ item: ClipItem) -> String {
         let base = item.railTitle
-            .components(separatedBy: .newlines).first ?? "Clipping"
+            .components(separatedBy: .newlines).first ?? String(localized: "Clipping", comment: "File name for a clip previewed in Quick Look")
         let cleaned = base
             .components(separatedBy: CharacterSet.alphanumerics.union(.whitespaces).inverted)
             .joined(separator: " ")
             .trimmingCharacters(in: .whitespaces)
         let trimmed = String(cleaned.prefix(40)).trimmingCharacters(in: .whitespaces)
-        return trimmed.isEmpty ? "Clipping" : trimmed
+        return trimmed.isEmpty ? String(localized: "Clipping", comment: "File name for a clip previewed in Quick Look") : trimmed
     }
 }

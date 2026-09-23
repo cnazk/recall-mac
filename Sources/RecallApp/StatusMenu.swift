@@ -62,27 +62,27 @@ final class StatusMenu {
             menu.addItem(.separator())
         }
 
-        add(to: menu, "Show Recall", #selector(MenuActions.showPanel(_:)), key: "v", modifiers: [.command, .shift])
+        add(to: menu, String(localized: "Show Recall"), #selector(MenuActions.showPanel(_:)), key: "v", modifiers: [.command, .shift])
 
         if owner?.loginItemNeedsApproval == true {
-            add(to: menu, "Approve “Open at Login”…", #selector(MenuActions.approveLoginItem(_:)))
+            add(to: menu, String(localized: "Approve “Open at Login”…"), #selector(MenuActions.approveLoginItem(_:)))
             menu.addItem(.separator())
         }
 
-        add(to: menu, "Scratchpad", #selector(MenuActions.toggleScratchpad(_:)), key: "v", modifiers: [.command, .option])
-        add(to: menu, "Two-Factor Codes", #selector(MenuActions.showCodes(_:)), key: "a", modifiers: [.command, .shift])
-        add(to: menu, "Capture Text from Screen", #selector(MenuActions.captureText(_:)),
+        add(to: menu, String(localized: "Scratchpad"), #selector(MenuActions.toggleScratchpad(_:)), key: "v", modifiers: [.command, .option])
+        add(to: menu, String(localized: "Two-Factor Codes"), #selector(MenuActions.showCodes(_:)), key: "a", modifiers: [.command, .shift])
+        add(to: menu, String(localized: "Capture Text from Screen"), #selector(MenuActions.captureText(_:)),
             key: "2", modifiers: [.command, .shift, .option])
 
         menu.addItem(.separator())
         addPauseSection(to: menu)
         menu.addItem(.separator())
 
-        add(to: menu, "Settings…", #selector(MenuActions.showSettings(_:)), key: ",", modifiers: .command)
-        add(to: menu, "Clear History…", #selector(MenuActions.clearHistory(_:)))
+        add(to: menu, String(localized: "Settings…"), #selector(MenuActions.showSettings(_:)), key: ",", modifiers: .command)
+        add(to: menu, String(localized: "Clear History…"), #selector(MenuActions.clearHistory(_:)))
 
         menu.addItem(.separator())
-        add(to: menu, "Quit Recall", #selector(MenuActions.quit(_:)), key: "q", modifiers: .command)
+        add(to: menu, String(localized: "Quit Recall"), #selector(MenuActions.quit(_:)), key: "q", modifiers: .command)
 
         statusItem.menu = menu
     }
@@ -92,7 +92,7 @@ final class StatusMenu {
         guard let model = owner?.model else { return }
 
         guard model.isCapturePaused else {
-            let pause = NSMenuItem(title: "Pause Capture", action: nil, keyEquivalent: "")
+            let pause = NSMenuItem(title: String(localized: "Pause Capture"), action: nil, keyEquivalent: "")
             let submenu = NSMenu()
             submenu.autoenablesItems = false
             add(to: submenu, PauseDuration.fifteenMinutes.menuTitle, #selector(MenuActions.pauseFifteenMinutes(_:)))
@@ -108,7 +108,7 @@ final class StatusMenu {
             item.isEnabled = false
             menu.addItem(item)
         }
-        add(to: menu, "Resume Capture", #selector(MenuActions.resumeCapture(_:)))
+        add(to: menu, String(localized: "Resume Capture"), #selector(MenuActions.resumeCapture(_:)))
     }
 
     private func add(

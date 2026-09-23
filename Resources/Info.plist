@@ -4,6 +4,16 @@
 <dict>
 	<key>CFBundleName</key>
 	<string>Recall</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<!-- Listed so System Settings › General › Language & Region offers them per app. -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>fa</string>
+		<string>ru</string>
+		<string>zh-Hans</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Recall</string>
 	<key>CFBundleExecutable</key>

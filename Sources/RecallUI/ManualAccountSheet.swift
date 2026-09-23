@@ -66,7 +66,7 @@ struct ManualAccountSheet: View {
         // Validated here rather than in the helper, so a typo is caught while the field
         // that caused it is still on screen.
         guard let decoded = Base32.decode(secret), !decoded.isEmpty else {
-            problem = "That secret is not valid base32. It should look like JBSWY3DPEHPK3PXP."
+            problem = String(localized: "That secret is not valid base32. It should look like JBSWY3DPEHPK3PXP.")
             return
         }
 
@@ -85,7 +85,7 @@ struct ManualAccountSheet: View {
             if await model.importURI(OTPURI.string(for: draft)) > 0 {
                 dismiss()
             } else {
-                problem = model.failure ?? "That account could not be added."
+                problem = model.failure ?? String(localized: "That account could not be added.")
             }
         }
     }

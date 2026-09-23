@@ -1,5 +1,7 @@
 ![Recall — a local-first, AI-integrated clipboard manager for macOS](docs/banner.jpg)
 
+**English** · [فارسی](README.fa.md) · [Русский](README.ru.md) · [简体中文](README.zh-Hans.md)
+
 Recall remembers everything you copy, lets you search it by *meaning* rather than by the
 exact words, and treats anything that looks like a credential as radioactive.
 
@@ -244,6 +246,9 @@ Language detection is automatic rather than pinned to English.
   silently rewrites itself.
 - **Auto-tags** from an on-device model, which feed Smart Collections.
 - **Menu-bar app** — no Dock icon. Summon it, use it, it goes away.
+- **In your language** — English, Persian (fully right-to-left), Russian and Simplified
+  Chinese. Recall follows the system language, or pick one for it alone in **System
+  Settings › General › Language & Region**.
 
 ---
 

@@ -93,9 +93,9 @@ public struct OnboardingView: View {
     @ViewBuilder
     private func permission(
         icon: String,
-        title: String,
-        detail: String,
-        action: String?,
+        title: LocalizedStringKey,
+        detail: LocalizedStringKey,
+        action: LocalizedStringKey?,
         perform: (() -> Void)? = nil
     ) -> some View {
         HStack(alignment: .top, spacing: 12) {

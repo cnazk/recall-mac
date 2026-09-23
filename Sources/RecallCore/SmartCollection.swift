@@ -54,6 +54,24 @@ public struct SmartCollection: Codable, Sendable, Hashable, Identifiable {
         return query
     }
 
+    /// The name to show. The built-in collections are named in the user's language;
+    /// a collection the user named keeps exactly what they typed.
+    ///
+    /// Matched on the stored English name rather than stored translated, so switching the
+    /// Mac's language renames them too, and a user's own "Links" is not second-guessed —
+    /// it is shown translated, which is what they would have typed anyway.
+    public var displayName: String {
+        switch name {
+        case "Pinned": String(localized: "Pinned")
+        case "Code": String(localized: "Code", comment: "A collection of copied source code")
+        case "Links": String(localized: "Links")
+        case "Receipts": String(localized: "Receipts")
+        case "Emails": String(localized: "Emails")
+        case "Images": String(localized: "Images")
+        default: name
+        }
+    }
+
     /// A collection with no conditions matches everything, which is never what the user
     /// meant and would quietly look like a bug.
     public var isWellFormed: Bool {

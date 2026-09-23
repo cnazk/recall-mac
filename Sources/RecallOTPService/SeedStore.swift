@@ -36,11 +36,11 @@ struct SeedStore {
         var description: String {
             switch self {
             case .notFound:
-                "That account is no longer stored."
+                String(localized: "That account is no longer stored.")
             case .biometricsFailed(let reason):
                 reason
             case .vault(let detail):
-                "The two-factor store could not be read: \(detail)"
+                String(localized: "The two-factor store could not be read: \(detail)")
             }
         }
     }

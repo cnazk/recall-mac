@@ -35,7 +35,7 @@ struct TransformSheet: View {
                 transformPicker
                 if selected?.needsArgument == true {
                     Picker("Into", selection: $language) {
-                        ForEach(ClipTransform.translationLanguages, id: \.self) { Text($0).tag($0) }
+                        ForEach(ClipTransform.translationLanguages, id: \.self) { Text(Self.displayName(ofLanguage: $0)).tag($0) }
                     }
                     .onChange(of: language) { _, _ in run() }
                 }
@@ -145,4 +145,16 @@ struct TransformSheet: View {
             isRunning = false
         }
     }
+
+    /// The picker's values stay in English, because that is what the model is told. What
+    /// is shown is each language named in the user's own: "Allemand", "Немецкий", "德语".
+    static func displayName(ofLanguage english: String) -> String {
+        guard let code = languageCodes[english] else { return english }
+        return Locale.current.localizedString(forIdentifier: code) ?? english
+    }
+
+    static let languageCodes: [String: String] = [
+        "English": "en", "Spanish": "es", "French": "fr", "German": "de", "Portuguese": "pt",
+        "Italian": "it", "Dutch": "nl", "Japanese": "ja", "Korean": "ko", "Chinese (Simplified)": "zh-Hans",
+    ]
 }

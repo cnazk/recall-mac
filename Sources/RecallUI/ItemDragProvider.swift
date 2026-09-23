@@ -30,7 +30,7 @@ struct ItemDragProvider: ViewModifier {
             // A sensitive value must not be draggable in the clear, any more than it is
             // shown in the clear.
             guard item.sensitivity != .secret else {
-                return NSItemProvider(object: NSString(string: "Sensitive value"))
+                return NSItemProvider(object: NSString(string: String(localized: "Sensitive value")))
             }
 
             switch item.payload {

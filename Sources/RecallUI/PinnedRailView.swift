@@ -117,7 +117,7 @@ public extension ClipItem {
     /// A short label for a chip or list. Secrets are never shown in the clear, pinned or
     /// not.
     var railTitle: String {
-        if sensitivity == .secret { return "Sensitive value" }
+        if sensitivity == .secret { return String(localized: "Sensitive value") }
         if let summary, !summary.isEmpty { return summary }
         switch payload {
         case .text(let text), .richText(_, let text):
@@ -127,9 +127,9 @@ public extension ClipItem {
         case .color(let color):
             return color.raw
         case .image:
-            return "Image"
+            return String(localized: "Image")
         case .files(let refs):
-            return refs.count == 1 ? refs[0].url.lastPathComponent : "\(refs.count) files"
+            return refs.count == 1 ? refs[0].url.lastPathComponent : String(localized: "\(refs.count) files")
         }
     }
 }

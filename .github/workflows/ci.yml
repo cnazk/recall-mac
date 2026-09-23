@@ -40,6 +40,12 @@ jobs:
       - name: Test
         run: swift test
 
+      # The tests check that what is in the catalog is translated; this checks that
+      # everything the source uses is in the catalog at all. A string added to the UI and
+      # never synced would otherwise ship in English to every language, silently.
+      - name: Every string is in the translation catalog
+        run: ./Scripts/strings.sh --check
+
       # The bundle step is the one that has historically broken without any test noticing:
       # a missing resource bundle used to take the app down at launch. Assembling it on
       # every push is the only thing that catches that.

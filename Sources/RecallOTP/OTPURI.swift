@@ -10,10 +10,10 @@ public enum OTPURI {
 
         public var description: String {
             switch self {
-            case .notAnOTPURI: "That is not a two-factor setup link."
-            case .unsupportedKind(let kind): "Unsupported code type “\(kind)”."
-            case .missingSecret: "The link has no secret in it."
-            case .malformedSecret: "The secret in that link is not valid base32."
+            case .notAnOTPURI: String(localized: "That is not a two-factor setup link.")
+            case .unsupportedKind(let kind): String(localized: "Unsupported code type “\(kind)”.")
+            case .missingSecret: String(localized: "The link has no secret in it.")
+            case .malformedSecret: String(localized: "The secret in that link is not valid base32.")
             }
         }
     }

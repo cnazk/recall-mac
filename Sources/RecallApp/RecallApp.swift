@@ -47,7 +47,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let settingsController = SettingsController()
         self.settingsController = settingsController
 
-        startupMessage = "Starting…"
+        startupMessage = String(localized: "Starting…")
         statusMenu = StatusMenu(owner: self)
         refreshStatusMenu()
         probeMainActorExecutor()
@@ -138,7 +138,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         } catch {
             watchdog.cancel()
             Log.ui.fault("Launch failed: \(String(describing: error), privacy: .public)")
-            startupMessage = "Recall could not open its history: \(error)"
+            startupMessage = String(localized: "Recall could not open its history: \(String(describing: error))")
             refreshStatusMenu()
         }
     }
@@ -197,7 +197,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Task { [weak self] in
             try? await Task.sleep(for: .seconds(3))
             guard !Task.isCancelled else { return }
-            self?.startupMessage = "Waiting for permission to use your keychain…"
+            self?.startupMessage = String(localized: "Waiting for permission to use your keychain…")
             self?.refreshStatusMenu()
         }
     }
@@ -613,7 +613,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         if snippetWatcher.start() == .needsAccessibilityPermission {
             model?.paste.requestAccessibilityPermission()
-            startupMessage = "Snippet expansion needs Accessibility permission."
+            startupMessage = String(localized: "Snippet expansion needs Accessibility permission.")
         }
     }
 
@@ -644,7 +644,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "Welcome to Recall"
+        window.title = String(localized: "Welcome to Recall")
         window.contentView = NSHostingView(
             rootView: OnboardingView(controller: settingsController, paste: paste)
         )
@@ -663,10 +663,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func confirmClearHistory() {
         let alert = NSAlert()
-        alert.messageText = "Clear clipboard history?"
-        alert.informativeText = "Everything except pinned items will be deleted. This cannot be undone."
-        alert.addButton(withTitle: "Clear")
-        alert.addButton(withTitle: "Cancel")
+        alert.messageText = String(localized: "Clear clipboard history?")
+        alert.informativeText = String(localized: "Everything except pinned items will be deleted. This cannot be undone.")
+        alert.addButton(withTitle: String(localized: "Clear"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         alert.alertStyle = .warning
 
         guard alert.runModal() == .alertFirstButtonReturn else { return }

@@ -155,7 +155,7 @@ public final class OTPModel {
         do {
             let capture = try await RegionCapture().captureRegion()
             guard let uri = try barcodes.twoFactorURI(in: capture.image.data) else {
-                failure = "No two-factor QR code was found in that region."
+                failure = String(localized: "No two-factor QR code was found in that region.")
                 return
             }
             await importURI(uri)

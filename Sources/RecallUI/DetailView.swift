@@ -1,6 +1,7 @@
 import AppKit
 import RecallCapture
 import RecallCore
+import RecallSecurity
 import SwiftUI
 
 /// The detail pane: the full item, where it came from, and the warnings that apply to it.
@@ -49,15 +50,15 @@ struct DetailView: View {
                 CautionBox(
                     icon: "exclamationmark.shield",
                     tint: .orange,
-                    title: "Pinned — kept until you remove it",
-                    message: "This looks like a credential\(detectionSuffix(item)). Recall would normally delete it automatically; pinning it turned that off."
+                    title: String(localized: "Pinned — kept until you remove it"),
+                    message: pinnedCredentialMessage(for: item)
                 )
             } else {
                 CautionBox(
                     icon: "timer",
                     tint: .orange,
-                    title: "Deletes itself shortly",
-                    message: "This looks like a credential\(detectionSuffix(item)). Pin it if you need to keep it."
+                    title: String(localized: "Deletes itself shortly"),
+                    message: expiringCredentialMessage(for: item)
                 )
             }
         }
@@ -66,30 +67,52 @@ struct DetailView: View {
             CautionBox(
                 icon: "internaldrive",
                 tint: .secondary,
-                title: "This pin is temporary",
-                message: "In-Memory Mode keeps nothing on disk. Pins are cleared when Recall quits."
+                title: String(localized: "This pin is temporary"),
+                message: String(localized: "In-Memory Mode keeps nothing on disk. Pins are cleared when Recall quits.")
             )
         }
     }
 
-    /// Names the rules that actually fired, so a false positive is obvious as one.
-    private func detectionSuffix(_ item: ClipItem) -> String {
-        guard !item.detectedRules.isEmpty else { return "" }
-        let names = item.detectedRules.map { Self.ruleNames[$0] ?? $0 }
-        return " — matched \(names.formatted(.list(type: .and)))"
+    /// Whole sentences, one per case, rather than a suffix spliced into a sentence: the
+    /// clause lands in a different place in every language, and a translator can only
+    /// move it if they are given the sentence it belongs to.
+    private func pinnedCredentialMessage(for item: ClipItem) -> String {
+        guard let matched = matchedRules(item) else {
+            return String(localized: "This looks like a credential. Recall would normally delete it automatically; pinning it turned that off.")
+        }
+        return String(localized: "This looks like a credential — matched \(matched). Recall would normally delete it automatically; pinning it turned that off.")
     }
 
-    /// Plain-language names for the detector's rule identifiers.
+    private func expiringCredentialMessage(for item: ClipItem) -> String {
+        guard let matched = matchedRules(item) else {
+            return String(localized: "This looks like a credential. Pin it if you need to keep it.")
+        }
+        return String(localized: "This looks like a credential — matched \(matched). Pin it if you need to keep it.")
+    }
+
+    /// Names the rules that actually fired, so a false positive is obvious as one.
+    private func matchedRules(_ item: ClipItem) -> String? {
+        guard !item.detectedRules.isEmpty else { return nil }
+        let names = item.detectedRules.map { identifier in
+            Self.ruleNames[identifier]
+                ?? SecretRule.builtIn.first { $0.identifier == identifier }?.displayName
+                ?? identifier
+        }
+        return names.formatted(.list(type: .and))
+    }
+
+    /// Plain-language names for the detector's rule identifiers, as they read mid-sentence.
+    /// Rules not listed fall back to their name from Settings.
     private static let ruleNames: [String: String] = [
-        "otp": "a one-time code",
-        "credit-card": "a card number",
-        "aws.access-key": "an AWS access key",
-        "aws.secret-key": "an AWS secret key",
-        "github.token": "a GitHub token",
-        "generic.api-key": "an API key",
-        "pem.private-key": "a private key",
-        "jwt": "a JSON web token",
-        "password.assignment": "a password assignment",
+        "otp": String(localized: "a one-time code"),
+        "credit-card": String(localized: "a card number"),
+        "aws.access-key": String(localized: "an AWS access key"),
+        "aws.secret-key": String(localized: "an AWS secret key"),
+        "github.token": String(localized: "a GitHub token"),
+        "generic.api-key": String(localized: "an API key"),
+        "pem.private-key": String(localized: "a private key"),
+        "jwt": String(localized: "a JSON web token"),
+        "password.assignment": String(localized: "a password assignment"),
     ]
 
     @ViewBuilder
@@ -106,7 +129,7 @@ struct DetailView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 6))
             }
             if let ocr = item.ocrText, !ocr.isEmpty {
-                LabeledBlock(title: "Text in image", text: ocr, isCopyable: true, isScrollable: isEmbedded)
+                LabeledBlock(title: String(localized: "Text in image"), text: ocr, isCopyable: true, isScrollable: isEmbedded)
             }
 
         case .color(let color):
@@ -187,10 +210,10 @@ struct DetailView: View {
         var facts = [item.createdAt.formatted(date: .abbreviated, time: .shortened)]
 
         if item.useCount > 0 {
-            facts.append("pasted \(item.useCount)×")
+            facts.append(String(localized: "pasted \(item.useCount)×", comment: "How many times a clip has been pasted"))
         }
         if item.isPinned {
-            facts.append("pinned")
+            facts.append(String(localized: "pinned", comment: "Marks a clip, or a collection of clips, as pinned"))
         }
         if !item.tags.isEmpty {
             facts.append(item.tags.sorted().map { "#\($0)" }.joined(separator: " "))

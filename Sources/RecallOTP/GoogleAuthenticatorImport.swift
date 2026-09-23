@@ -26,9 +26,9 @@ public enum GoogleAuthenticatorImport {
 
         public var description: String {
             switch self {
-            case .notAMigrationURI: "That is not a Google Authenticator export link."
-            case .malformedPayload: "That export could not be read."
-            case .noAccounts: "That export contained no accounts."
+            case .notAMigrationURI: String(localized: "That is not a Google Authenticator export link.")
+            case .malformedPayload: String(localized: "That export could not be read.")
+            case .noAccounts: String(localized: "That export contained no accounts.")
             }
         }
     }

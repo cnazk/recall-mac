@@ -169,7 +169,7 @@ public struct ItemRowView: View {
     /// Secrets are never previewed in the clear; long text prefers the AI summary.
     private var previewText: String {
         if item.sensitivity == .secret {
-            return "Sensitive value — hidden"
+            return String(localized: "Sensitive value — hidden")
         }
         if let summary = item.summary, !summary.isEmpty {
             return summary
@@ -187,11 +187,11 @@ public struct ItemRowView: View {
             if let text = Self.singleLine(item.ocrText), !text.isEmpty {
                 return text
             }
-            return "Image — \(image.pixelWidth)×\(image.pixelHeight)"
+            return String(localized: "Image — \(image.pixelWidth)×\(image.pixelHeight)")
         case .files(let refs):
             return refs.count == 1
                 ? refs[0].url.lastPathComponent
-                : "\(refs.count) files"
+                : String(localized: "\(refs.count) files")
         }
     }
 

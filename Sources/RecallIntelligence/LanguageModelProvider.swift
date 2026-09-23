@@ -41,9 +41,9 @@ public enum LanguageModelUnavailable: Error, CustomStringConvertible {
 
     public var description: String {
         switch self {
-        case .notSupportedOnThisMac: "This Mac does not support on-device language models."
-        case .appleIntelligenceDisabled: "Turn on Apple Intelligence in System Settings to use AI actions."
-        case .modelNotReady: "The on-device model is still downloading."
+        case .notSupportedOnThisMac: String(localized: "This Mac does not support on-device language models.")
+        case .appleIntelligenceDisabled: String(localized: "Turn on Apple Intelligence in System Settings to use AI actions.")
+        case .modelNotReady: String(localized: "The on-device model is still downloading.")
         }
     }
 }

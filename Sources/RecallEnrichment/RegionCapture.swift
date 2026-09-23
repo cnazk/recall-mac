@@ -26,9 +26,9 @@ public struct RegionCapture: Sendable {
 
         public var description: String {
             switch self {
-            case .cancelled: "Screen capture was cancelled."
-            case .captureFailed(let code): "screencapture exited with code \(code)."
-            case .unreadableImage: "The captured region could not be read."
+            case .cancelled: String(localized: "Screen capture was cancelled.")
+            case .captureFailed(let code): String(localized: "Screen capture failed (code \(code)).")
+            case .unreadableImage: String(localized: "The captured region could not be read.")
             }
         }
     }

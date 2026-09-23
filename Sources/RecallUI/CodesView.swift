@@ -223,7 +223,7 @@ public struct CodesView: View {
         ContentUnavailableView {
             Label("Two-factor helper unavailable", systemImage: "exclamationmark.triangle")
         } description: {
-            Text(model.failure ?? "The helper that holds your two-factor secrets could not be reached.")
+            Text(model.failure ?? String(localized: "The helper that holds your two-factor secrets could not be reached."))
                 .font(.caption)
             Button("Try Again") {
                 Task { await model.refresh() }

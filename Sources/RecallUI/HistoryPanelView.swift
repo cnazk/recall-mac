@@ -196,10 +196,10 @@ public struct HistoryPanelView: View {
             Picker("Collection", selection: collectionSelection) {
                 Label("All", systemImage: "tray.full").tag(UUID?.none)
                 ForEach(model.collections) { collection in
-                    Label(collection.name, systemImage: collection.systemImage)
+                    Label(collection.displayName, systemImage: collection.systemImage)
                         .tag(Optional(collection.id))
                 }
-                Label(SmartCollection.pinned.name, systemImage: SmartCollection.pinned.systemImage)
+                Label(SmartCollection.pinned.displayName, systemImage: SmartCollection.pinned.systemImage)
                     .tag(Optional(SmartCollection.pinned.id))
             }
             .pickerStyle(.inline)
@@ -234,9 +234,9 @@ public struct HistoryPanelView: View {
     }
 
     private var filterLabel: String {
-        if let collection = model.selectedCollection { return collection.name }
+        if let collection = model.selectedCollection { return collection.displayName }
         if let kind = model.selectedKind { return kind.displayName }
-        return "All"
+        return String(localized: "All")
     }
 
     private var collectionSelection: Binding<UUID?> {
@@ -261,7 +261,7 @@ public struct HistoryPanelView: View {
     private var pausedBanner: some View {
         HStack(spacing: 8) {
             Image(systemName: "pause.circle.fill")
-            Text(model.capturePauseStatus ?? "Paused")
+            Text(model.capturePauseStatus ?? String(localized: "Paused"))
                 .font(.callout)
             Spacer()
             Button("Resume") { model.resumeCapture() }
@@ -402,10 +402,13 @@ public struct HistoryPanelView: View {
         HStack(spacing: 12) {
             Text(countText)
             Spacer()
-            ForEach(Self.hints, id: \.0) { hint in
+            ForEach(Self.hints, id: \.keys) { hint in
                 HStack(spacing: 3) {
-                    Text(hint.0).monospaced()
-                    Text(hint.1)
+                    // Monospaced for key glyphs only. The monospaced face has no Persian
+                    // or Chinese letters, and falling back glyph by glyph spaced a word
+                    // out letter by letter.
+                    Text(hint.keys).monospaced(hint.isGlyphs)
+                    Text(hint.action)
                 }
             }
         }
@@ -415,20 +418,19 @@ public struct HistoryPanelView: View {
         .padding(.vertical, 6)
     }
 
-    private static let hints: [(String, String)] = [
-        ("↩", "paste"),
+    private static let hints: [(keys: String, action: String, isGlyphs: Bool)] = [
+        ("↩", String(localized: "paste", comment: "Footer hint: what Return does"), true),
         // Worth saying out loud: the second click used to be the first.
-        ("click ×2", "paste"),
-        ("⌘Y", "preview"),
-        ("⌘P", "pin"),
-        ("⌘D", "compare"),
-        ("⇥", "kind"),
-        ("⌃⇥", "codes"),
+        (String(localized: "click ×2", comment: "Footer hint: a double click"), String(localized: "paste", comment: "Footer hint: what Return does"), false),
+        ("⌘Y", String(localized: "preview", comment: "Footer hint: what ⌘Y does"), true),
+        ("⌘P", String(localized: "pin", comment: "Footer hint: what ⌘P does"), true),
+        ("⌘D", String(localized: "compare", comment: "Footer hint: what ⌘D does"), true),
+        ("⇥", String(localized: "kind", comment: "Footer hint: Tab cycles the kind filter"), true),
+        ("⌃⇥", String(localized: "codes", comment: "Footer hint: ⌃⇥ switches to two-factor codes"), true),
     ]
 
     private var countText: String {
-        let count = model.items.count
-        return count == 1 ? "1 item" : "\(count) items"
+        String(localized: "\(model.items.count) items")
     }
 
     @ViewBuilder
@@ -631,12 +633,12 @@ private final class PageMetrics {
 extension ClipKind {
     var displayName: String {
         switch self {
-        case .text: "Text"
-        case .richText: "Rich Text"
-        case .image: "Images"
-        case .file: "Files"
-        case .url: "Links"
-        case .color: "Colors"
+        case .text: String(localized: "Text", comment: "The kind filter: plain text clips")
+        case .richText: String(localized: "Rich Text")
+        case .image: String(localized: "Images")
+        case .file: String(localized: "Files")
+        case .url: String(localized: "Links")
+        case .color: String(localized: "Colors")
         }
     }
 

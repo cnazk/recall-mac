@@ -30,7 +30,7 @@ final class OTPServiceImplementation: NSObject, OTPServiceProtocol, @unchecked S
             } else if OTPURI.isOTPURI(uri) {
                 accounts = [try OTPURI.parse(uri)]
             } else {
-                reply(0, "That is not a two-factor setup or export link.")
+                reply(0, String(localized: "That is not a two-factor setup or export link."))
                 return
             }
 
@@ -46,7 +46,7 @@ final class OTPServiceImplementation: NSObject, OTPServiceProtocol, @unchecked S
 
     func code(forAccountID id: String, reply: @escaping (String?, Int, String?) -> Void) {
         guard let uuid = UUID(uuidString: id) else {
-            reply(nil, 0, "Unknown account.")
+            reply(nil, 0, String(localized: "Unknown account."))
             return
         }
 
@@ -58,7 +58,7 @@ final class OTPServiceImplementation: NSObject, OTPServiceProtocol, @unchecked S
         Task {
             do {
                 let account = try store.account(id: uuid)
-                try await store.authenticate(reason: "show the code for \(account.label)")
+                try await store.authenticate(reason: String(localized: "show the code for \(account.label)", comment: "Completes the Touch ID prompt “Recall is trying to …”"))
 
                 let code = OneTimePassword.code(for: account)
                 let remaining = account.kind == .totp
@@ -81,7 +81,7 @@ final class OTPServiceImplementation: NSObject, OTPServiceProtocol, @unchecked S
 
     func removeAccount(id: String, reply: @escaping (String?) -> Void) {
         guard let uuid = UUID(uuidString: id) else {
-            reply("Unknown account.")
+            reply(String(localized: "Unknown account."))
             return
         }
         do {
@@ -99,7 +99,7 @@ final class OTPServiceImplementation: NSObject, OTPServiceProtocol, @unchecked S
             do {
                 // Export is the one call that hands over secrets, so it authenticates
                 // every time regardless of the biometrics setting.
-                try await store.authenticate(reason: "export your two-factor accounts")
+                try await store.authenticate(reason: String(localized: "export your two-factor accounts", comment: "Completes the Touch ID prompt “Recall is trying to …”"))
                 reply.value(try store.all().map(OTPURI.string(for:)), nil)
             } catch {
                 reply.value(nil, String(describing: error))
@@ -109,7 +109,7 @@ final class OTPServiceImplementation: NSObject, OTPServiceProtocol, @unchecked S
 
     func setAuthenticationPolicy(_ rawValue: String, reply: @escaping (String?) -> Void) {
         guard let policy = OTPAuthenticationPolicy(rawValue: rawValue) else {
-            reply("“\(rawValue)” is not an authentication policy.")
+            reply(String(localized: "“\(rawValue)” is not an authentication policy."))
             return
         }
         do {

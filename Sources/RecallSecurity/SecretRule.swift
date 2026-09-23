@@ -60,48 +60,48 @@ public extension SecretRule {
     /// AWS access key IDs have a fixed, unmistakable shape.
     static let awsAccessKey = SecretRule(
         identifier: "aws.access-key",
-        displayName: "AWS access key",
-        summary: "Keys beginning AKIA, ASIA and similar.",
+        displayName: String(localized: "AWS access key"),
+        summary: String(localized: "Keys beginning AKIA, ASIA and similar."),
         confidence: .certain,
         pattern: "\\b(AKIA|ASIA|AGPA|AIDA|AROA|ANPA|ANVA)[0-9A-Z]{16}\\b"
     )
 
     static let awsSecretKey = SecretRule(
         identifier: "aws.secret-key",
-        displayName: "AWS secret key",
-        summary: "A 40-character secret next to the word “aws”.",
+        displayName: String(localized: "AWS secret key"),
+        summary: String(localized: "A 40-character secret next to the word “aws”."),
         confidence: .likely,
         pattern: "(?i)aws(.{0,20})?(secret|private)(.{0,20})?['\"][0-9a-zA-Z/+]{40}['\"]"
     )
 
     static let githubToken = SecretRule(
         identifier: "github.token",
-        displayName: "GitHub token",
-        summary: "Personal access, OAuth and app tokens (ghp_, gho_, github_pat_).",
+        displayName: String(localized: "GitHub token"),
+        summary: String(localized: "Personal access, OAuth and app tokens (ghp_, gho_, github_pat_)."),
         confidence: .certain,
         pattern: "\\b(ghp|gho|ghu|ghs|ghr|github_pat)_[0-9a-zA-Z_]{22,}\\b"
     )
 
     static let openAIKey = SecretRule(
         identifier: "generic.api-key",
-        displayName: "API key (sk- / pk-)",
-        summary: "The sk-/pk- prefix used by many API providers.",
+        displayName: String(localized: "API key (sk- / pk-)"),
+        summary: String(localized: "The sk-/pk- prefix used by many API providers."),
         confidence: .certain,
         pattern: "\\b(sk|pk)-[A-Za-z0-9_-]{20,}\\b"
     )
 
     static let privateKeyBlock = SecretRule(
         identifier: "pem.private-key",
-        displayName: "Private key block",
-        summary: "PEM and OpenSSH private keys.",
+        displayName: String(localized: "Private key block"),
+        summary: String(localized: "PEM and OpenSSH private keys."),
         confidence: .certain,
         pattern: "-----BEGIN [A-Z ]*PRIVATE KEY-----"
     )
 
     static let jsonWebToken = SecretRule(
         identifier: "jwt",
-        displayName: "JSON web token",
-        summary: "Three base64 segments beginning eyJ.",
+        displayName: String(localized: "JSON web token"),
+        summary: String(localized: "Three base64 segments beginning eyJ."),
         confidence: .likely,
         pattern: "\\beyJ[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\b"
     )
@@ -110,8 +110,8 @@ public extension SecretRule {
     /// whole clip to be just the code so that copying a page of numbers is not caught.
     static let oneTimeCode = SecretRule(
         identifier: "otp",
-        displayName: "One-time code",
-        summary: "A bare 6–8 digit number, on its own.",
+        displayName: String(localized: "One-time code"),
+        summary: String(localized: "A bare 6–8 digit number, on its own."),
         confidence: .likely
     ) { text in
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -124,8 +124,8 @@ public extension SecretRule {
     /// false positives from order numbers and IDs.
     static let creditCard = SecretRule(
         identifier: "credit-card",
-        displayName: "Card number",
-        summary: "13–19 digits that pass the Luhn check.",
+        displayName: String(localized: "Card number"),
+        summary: String(localized: "13–19 digits that pass the Luhn check."),
         confidence: .certain
     ) { text in
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -139,8 +139,8 @@ public extension SecretRule {
 
     static let passwordAssignment = SecretRule(
         identifier: "password.assignment",
-        displayName: "Password assignment",
-        summary: "password = …, token: …, api_key = … and similar.",
+        displayName: String(localized: "Password assignment"),
+        summary: String(localized: "password = …, token: …, api_key = … and similar."),
         confidence: .likely,
         pattern: "(?i)\\b(password|passwd|pwd|secret|token|api[_-]?key)\\b\\s*[:=]\\s*\\S{6,}"
     )

@@ -31,23 +31,23 @@ public enum MainMenu {
     private static func applicationMenuItem() -> NSMenuItem {
         let item = NSMenuItem()
         let menu = NSMenu(title: "Recall")
-        add(to: menu, "Settings…", #selector(MainMenuActions.showSettings(_:)), ",")
+        add(to: menu, String(localized: "Settings…"), #selector(MainMenuActions.showSettings(_:)), ",")
         item.submenu = menu
         return item
     }
 
     private static func editMenuItem() -> NSMenuItem {
         let item = NSMenuItem()
-        let menu = NSMenu(title: "Edit")
+        let menu = NSMenu(title: String(localized: "Edit"))
 
-        add(to: menu, "Undo", #selector(UndoManager.undo), "z")
-        add(to: menu, "Redo", #selector(UndoManager.redo), "Z", [.command, .shift])
+        add(to: menu, String(localized: "Undo"), #selector(UndoManager.undo), "z")
+        add(to: menu, String(localized: "Redo"), #selector(UndoManager.redo), "Z", [.command, .shift])
         menu.addItem(.separator())
-        add(to: menu, "Cut", #selector(NSText.cut(_:)), "x")
-        add(to: menu, "Copy", #selector(NSText.copy(_:)), "c")
-        add(to: menu, "Paste", #selector(NSText.paste(_:)), "v")
-        add(to: menu, "Delete", #selector(NSText.delete(_:)), "")
-        add(to: menu, "Select All", #selector(NSText.selectAll(_:)), "a")
+        add(to: menu, String(localized: "Cut"), #selector(NSText.cut(_:)), "x")
+        add(to: menu, String(localized: "Copy"), #selector(NSText.copy(_:)), "c")
+        add(to: menu, String(localized: "Paste"), #selector(NSText.paste(_:)), "v")
+        add(to: menu, String(localized: "Delete"), #selector(NSText.delete(_:)), "")
+        add(to: menu, String(localized: "Select All"), #selector(NSText.selectAll(_:)), "a")
 
         item.submenu = menu
         return item

@@ -15,8 +15,8 @@ public extension SecretRule {
     /// a seed phrase is the one secret here whose loss is unrecoverable and total.
     static let seedPhrase = SecretRule(
         identifier: "crypto.seed-phrase",
-        displayName: "Recovery phrase",
-        summary: "A valid BIP-39 wallet phrase, wordlist and checksum verified.",
+        displayName: String(localized: "Recovery phrase"),
+        summary: String(localized: "A valid BIP-39 wallet phrase, wordlist and checksum verified."),
         confidence: .certain
     ) { text in
         BIP39.isValidPhrase(text)
@@ -25,8 +25,8 @@ public extension SecretRule {
     /// An IBAN, validated with the mod-97 check the standard defines.
     static let iban = SecretRule(
         identifier: "bank.iban",
-        displayName: "IBAN",
-        summary: "Bank account numbers that pass the mod-97 check.",
+        displayName: String(localized: "IBAN"),
+        summary: String(localized: "Bank account numbers that pass the mod-97 check."),
         confidence: .likely
     ) { text in
         let trimmed = text.replacingOccurrences(of: " ", with: "").uppercased()
@@ -45,8 +45,8 @@ public extension SecretRule {
     /// act on. Requiring the label is what keeps this from eating order numbers.
     static let nationalIdentifier = SecretRule(
         identifier: "id.national",
-        displayName: "National ID number",
-        summary: "A social security or NI number, when labelled as one.",
+        displayName: String(localized: "National ID number"),
+        summary: String(localized: "A social security or NI number, when labelled as one."),
         confidence: .likely,
         pattern: "(?i)\\b(ssn|social security|national insurance|\\bni\\b)\\b[^\\n]{0,20}?\\b(\\d{3}-\\d{2}-\\d{4}|\\d{9}|[A-Z]{2}\\s?\\d{2}\\s?\\d{2}\\s?\\d{2}\\s?[A-D])\\b"
     )

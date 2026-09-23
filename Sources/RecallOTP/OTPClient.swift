@@ -11,7 +11,7 @@ public actor OTPClient {
 
         public var description: String {
             switch self {
-            case .unavailable(let detail): "The two-factor helper is not available: \(detail)"
+            case .unavailable(let detail): String(localized: "The two-factor helper is not available: \(detail)")
             case .service(let message): message
             }
         }
@@ -122,7 +122,7 @@ public actor OTPClient {
                 } else if let code {
                     finish(.success(CodeReply(code: code, secondsRemaining: remaining)))
                 } else {
-                    finish(.failure(Failure.service("No code was produced.")))
+                    finish(.failure(Failure.service(String(localized: "No code was produced."))))
                 }
             }
         }

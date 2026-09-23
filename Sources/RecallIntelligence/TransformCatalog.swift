@@ -27,7 +27,7 @@ public extension ClipTransform {
 
     static let markdownTable = ClipTransform(
         id: "markdown-table",
-        title: "Paste as Markdown Table",
+        title: String(localized: "Paste as Markdown Table"),
         systemImage: "tablecells",
         instructions: """
         Convert the user's text into a GitHub-flavoured Markdown table. \
@@ -38,7 +38,7 @@ public extension ClipTransform {
 
     static let summarize = ClipTransform(
         id: "summarize",
-        title: "Paste Summarized",
+        title: String(localized: "Paste Summarized"),
         systemImage: "text.redaction",
         instructions: """
         Summarise the user's text in at most three sentences, preserving names, \
@@ -55,7 +55,7 @@ public extension ClipTransform {
 
     static let translate = ClipTransform(
         id: "translate",
-        title: "Paste Translated",
+        title: String(localized: "Paste Translated"),
         systemImage: "character.bubble",
         instructions: """
         Translate the user's text into the requested language, preserving formatting, \
@@ -66,7 +66,7 @@ public extension ClipTransform {
 
     static let asPython = ClipTransform(
         id: "as-python",
-        title: "Paste as Python",
+        title: String(localized: "Paste as Python"),
         systemImage: "chevron.left.forwardslash.chevron.right",
         instructions: """
         Rewrite the user's code or pseudocode as idiomatic Python. \
@@ -77,7 +77,7 @@ public extension ClipTransform {
 
     static let asJSON = ClipTransform(
         id: "as-json",
-        title: "Paste as JSON",
+        title: String(localized: "Paste as JSON"),
         systemImage: "curlybraces",
         instructions: """
         Convert the user's text into valid, minimal JSON. Reply with JSON only.
@@ -87,7 +87,7 @@ public extension ClipTransform {
 
     static let plainProse = ClipTransform(
         id: "clean-up",
-        title: "Paste Cleaned Up",
+        title: String(localized: "Paste Cleaned Up"),
         systemImage: "wand.and.sparkles",
         instructions: """
         Fix broken line wrapping, hyphenation and spacing in the user's text without \

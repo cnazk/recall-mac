@@ -79,11 +79,11 @@ public enum OTPAuthenticationPolicy: Equatable, Sendable, Codable {
     public var summary: String {
         switch self {
         case .always:
-            "Every code asks for Touch ID."
+            String(localized: "Every code asks for Touch ID.")
         case .never:
-            "Codes are shown to anyone at this Mac. Recall will not ask."
+            String(localized: "Codes are shown to anyone at this Mac. Recall will not ask.")
         case .afterGrace(let minutes):
-            "Asks once, then not again for \(minutes) minute\(minutes == 1 ? "" : "s"). Quitting Recall resets it."
+            String(localized: "Asks once, then not again for \(minutes) minutes. Quitting Recall resets it.")
         }
     }
 }

@@ -15,16 +15,16 @@ public enum RelativeTime {
 
         // A clip captured a moment "ahead" of now — a clock adjustment, or a stored date
         // from a machine that disagrees — reads as current rather than as nonsense.
-        guard seconds >= 60 else { return "now" }
+        guard seconds >= 60 else { return String(localized: "now", comment: "A clip copied under a minute ago") }
 
         let minutes = Int(seconds / 60)
-        if minutes < 60 { return "\(minutes)m" }
+        if minutes < 60 { return String(localized: "\(minutes)m", comment: "Minutes ago, abbreviated as short as possible") }
 
         let hours = minutes / 60
-        if hours < 24 { return "\(hours)h" }
+        if hours < 24 { return String(localized: "\(hours)h", comment: "Hours ago, abbreviated as short as possible") }
 
         let days = hours / 24
-        if days < 7 { return "\(days)d" }
+        if days < 7 { return String(localized: "\(days)d", comment: "Days ago, abbreviated as short as possible") }
 
         return dateLabel(for: date, now: now, calendar: calendar)
     }

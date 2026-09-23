@@ -1,3 +1,4 @@
+import AppKit
 import RecallOTP
 import RecallCore
 import RecallSecurity
@@ -50,13 +51,32 @@ public struct SettingsView: View {
         // Wide enough for six tabs. Narrower, and AppKit gives up and collapses them
         // into a "Navigation Tab Bar" overflow menu behind a chevron, which is a worse
         // way to present six items than any of the alternatives.
-        .frame(width: 640)
+        .frame(width: Self.width)
         .scenePadding()
         // Something asked for a particular page — the ✨ in the panel, for one. Handled
         // both on appear and on change, so it works whether Settings was already open or
         // is opening because of the request.
         .onAppear { honourRequestedTab() }
         .onChange(of: SettingsNavigator.shared.requestedTab) { _, _ in honourRequestedTab() }
+    }
+
+    /// 640 points, or more when the tab names need it.
+    ///
+    /// AppKit gives every tab the width of the longest name. English only just fits at
+    /// 640 — "Intelligence" is 70 points at the system size — and Persian's "حریم خصوصی",
+    /// at 77, already tipped the bar into the overflow menu. So the window grows by six
+    /// times however much the longest name runs past English's, plus a few points each
+    /// for the rounding a measurement like this cannot see.
+    static var width: CGFloat {
+        let names = [
+            String(localized: "General"), String(localized: "Privacy"), String(localized: "Intelligence"),
+            String(localized: "Collections"), String(localized: "Snippets"), String(localized: "Two-Factor"),
+        ]
+        let font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+        let longest = names.map { ($0 as NSString).size(withAttributes: [.font: font]).width }.max() ?? 0
+        let englishLongest: CGFloat = 70
+        guard longest > englishLongest else { return 640 }
+        return (640 + 6 * (longest - englishLongest + 4)).rounded(.up)
     }
 
     private func honourRequestedTab() {
@@ -197,11 +217,11 @@ public struct SettingsView: View {
 
             Section("History size") {
                 if let usage {
-                    LabeledContent("Stored", value: "\(usage.count.formatted()) items")
+                    LabeledContent("Stored", value: String(localized: "\(usage.count) items"))
                     LabeledContent(
                         "On disk",
                         value: usage.bytes == 0
-                            ? "Nothing — In-Memory Mode"
+                            ? String(localized: "Nothing — In-Memory Mode")
                             : ByteCountFormatter.string(fromByteCount: usage.bytes, countStyle: .file)
                     )
                 } else {
@@ -316,7 +336,7 @@ public struct SettingsView: View {
             Section {
                 ForEach(controller.settings.collections) { collection in
                     HStack {
-                        Label(collection.name, systemImage: collection.systemImage)
+                        Label(collection.displayName, systemImage: collection.systemImage)
                         Spacer()
                         Text(collection.summary)
                             .font(.caption)
@@ -504,7 +524,7 @@ public struct SettingsView: View {
                             }
                         )) {
                             ForEach(OTPAuthenticationPolicy.graceOptions, id: \.self) { minutes in
-                                Text(minutes == 1 ? "1 minute" : "\(minutes) minutes").tag(minutes)
+                                Text("\(minutes) minutes").tag(minutes)
                             }
                         }
                     }
@@ -581,11 +601,11 @@ private extension SmartCollection {
     /// A one-line description of what the collection matches, for the settings list.
     var summary: String {
         var parts: [String] = []
-        if pinnedOnly { parts.append("pinned") }
+        if pinnedOnly { parts.append(String(localized: "pinned", comment: "Marks a clip, or a collection of clips, as pinned")) }
         if !tags.isEmpty { parts.append(tags.sorted().map { "#\($0)" }.joined(separator: " ")) }
-        if !kinds.isEmpty { parts.append(kinds.map(\.rawValue).sorted().joined(separator: ", ")) }
+        if !kinds.isEmpty { parts.append(kinds.map(\.displayName).sorted().formatted(.list(type: .or))) }
         if let textContains, !textContains.isEmpty { parts.append("“\(textContains)”") }
-        if let sourceApp, !sourceApp.isEmpty { parts.append("from \(sourceApp)") }
+        if let sourceApp, !sourceApp.isEmpty { parts.append(String(localized: "from \(sourceApp)", comment: "Describes a collection of clips copied out of one app")) }
         return parts.joined(separator: " · ")
     }
 }

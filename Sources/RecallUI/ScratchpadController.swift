@@ -55,7 +55,7 @@ public final class ScratchpadController: NSObject, NSWindowDelegate {
             defer: false
         )
 
-        window.title = "Recall Scratchpad"
+        window.title = String(localized: "Recall Scratchpad")
         // The glass runs to the top edge, so the title bar has to be out of its way —
         // otherwise the rounded content corners sit *below* an opaque bar and read as
         // notches. The close button stays: nothing else dismisses this window.

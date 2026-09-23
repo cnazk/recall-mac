@@ -55,9 +55,9 @@ struct DiffView: View {
         let older = RelativeTime.label(for: comparison.older.createdAt)
         let newer = RelativeTime.label(for: comparison.newer.createdAt)
         guard older != newer else {
-            return "from \(clockTime(comparison.older)) to \(clockTime(comparison.newer))"
+            return String(localized: "from \(clockTime(comparison.older)) to \(clockTime(comparison.newer))")
         }
-        return "from \(older) to \(newer)"
+        return String(localized: "from \(older) to \(newer)")
     }
 
     private func clockTime(_ item: ClipItem) -> String {
@@ -172,11 +172,15 @@ struct DiffView: View {
     }
 
     private func summary(of diff: TextDiff.Result) -> String {
-        guard !diff.isIdentical else { return "Identical" }
-        let unit = diff.granularity == .line ? "line" : "word"
+        guard !diff.isIdentical else { return String(localized: "Identical") }
         let added = diff.insertedCount
         let removed = diff.removedCount
-        return "\(added) \(unit)\(added == 1 ? "" : "s") added · \(removed) removed"
+        // Four whole phrases rather than a unit spliced into one: the noun has to agree
+        // with its own count, and in most languages that changes more than an "s".
+        let parts = diff.granularity == .line
+            ? [String(localized: "\(added) lines added"), String(localized: "\(removed) lines removed")]
+            : [String(localized: "\(added) words added"), String(localized: "\(removed) words removed")]
+        return parts.joined(separator: " · ")
     }
 
     private func copy(_ text: String, as what: Copied) {

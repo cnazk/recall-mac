@@ -16,9 +16,9 @@ public enum PauseDuration: String, CaseIterable, Hashable, Sendable {
 
     public var menuTitle: String {
         switch self {
-        case .fifteenMinutes: "For 15 Minutes"
-        case .oneHour: "For 1 Hour"
-        case .indefinitely: "Until I Turn It Back On"
+        case .fifteenMinutes: String(localized: "For 15 Minutes")
+        case .oneHour: String(localized: "For 1 Hour")
+        case .indefinitely: String(localized: "Until I Turn It Back On")
         }
     }
 }
@@ -77,10 +77,10 @@ public struct CapturePause: Equatable, Sendable {
         let current = resolved(at: now)
         guard current.isPaused else { return nil }
         guard let remaining = current.remaining(at: now) else {
-            return "Paused until you resume"
+            return String(localized: "Paused until you resume")
         }
         let minutes = Int((remaining / 60).rounded(.up))
-        return minutes <= 1 ? "Paused — resumes in under a minute"
-                            : "Paused — resumes in \(minutes) minutes"
+        return minutes <= 1 ? String(localized: "Paused — resumes in under a minute")
+                            : String(localized: "Paused — resumes in \(minutes) minutes")
     }
 }

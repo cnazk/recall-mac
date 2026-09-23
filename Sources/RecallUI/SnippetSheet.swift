@@ -79,9 +79,9 @@ struct SnippetSheet: View {
             case .assigned:
                 dismiss()
             case .invalidCode:
-                problem = "That shortcode will not work. Try something like :sig."
+                problem = String(localized: "That shortcode will not work. Try something like :sig.")
             case .alreadyUsed(let owner):
-                problem = "\(code) is already used by “\(owner)”."
+                problem = String(localized: "\(code) is already used by “\(owner)”.")
             }
         }
     }

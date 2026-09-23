@@ -603,7 +603,7 @@ public final class AppModel {
             var item = ClipItem(
                 payload: payload,
                 contentHash: ContentHash(payload),
-                source: SourceApp(bundleIdentifier: nil, localizedName: "Screen Capture"),
+                source: SourceApp(bundleIdentifier: nil, localizedName: String(localized: "Screen Capture")),
                 createdAt: .now
             )
             // Text lifted off the screen keeps the image it came from, so the row can show
