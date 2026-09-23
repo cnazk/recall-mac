@@ -1,6 +1,4 @@
-# Recall
-
-**A local-first, AI-integrated clipboard manager for macOS.**
+![Recall — a local-first, AI-integrated clipboard manager for macOS](docs/banner.jpg)
 
 Recall remembers everything you copy, lets you search it by *meaning* rather than by the
 exact words, and treats anything that looks like a credential as radioactive.
