@@ -259,6 +259,8 @@ Language detection is automatic rather than pinned to English.
 | **⌘⌥V** | Scratchpad |
 | **⌘⌥⌃C** | Add to the paste stack |
 | ↑ ↓ | Move through history |
+| ⇞ ⇟ | Move a page at a time |
+| ⌘↑ ⌘↓ | Jump to the first or last item |
 | ⏎ | Paste |
 | ⇥ | Cycle by kind |
 | ⌥⏎ | Paste as… |
@@ -267,7 +269,7 @@ Language detection is automatic rather than pinned to English.
 | ⌘D | Compare two clips |
 | ⌘1…9 | Paste a numbered slot |
 | ⌘⌥1…9 | Assign a clip to a slot |
-| ⎋ | Dismiss |
+| ⎋ | Clear the search, or dismiss |
 | ⌘, | Settings |
 
 ---

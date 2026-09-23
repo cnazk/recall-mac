@@ -84,7 +84,15 @@ public struct CodesView: View {
                     }
                     return .handled
                 }
-                .onKeyPress(.escape) { model.dismissPanel?(); return .handled }
+                // The same order as the history tab: the query first, then the panel.
+                .onKeyPress(.escape) {
+                    if model.searchText.isEmpty {
+                        model.dismissPanel?()
+                    } else {
+                        model.searchText = ""
+                    }
+                    return .handled
+                }
 
             Menu {
                 Button("Scan QR Code on Screen…") {

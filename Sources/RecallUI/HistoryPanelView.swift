@@ -14,6 +14,7 @@ public struct HistoryPanelView: View {
     private let otp: OTPModel?
     @FocusState private var searchFocused: Bool
     @State private var transformTarget: ClipItem?
+    @State private var pageMetrics = PageMetrics()
 
     public init(model: AppModel, otp: OTPModel? = nil) {
         self.model = model
@@ -341,6 +342,11 @@ public struct HistoryPanelView: View {
                     showsSourceIcon: model.settings.showsSourceIcons
                 )
                 .contentShape(.rect)
+                // The row alone, not the detail under it: paging walks over rows that are
+                // closed, and only the selected one is open.
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                    pageMetrics.rowHeights[item.id] = height
+                }
                 .itemDragProvider(item, model: model)
                 // First click selects and opens the detail below; the second pastes.
                 //
@@ -372,6 +378,9 @@ public struct HistoryPanelView: View {
         }
         .listStyle(.inset)
         .scrollContentBackground(.hidden)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+            pageMetrics.viewportHeight = height
+        }
         .animation(.easeOut(duration: 0.12), value: model.selection)
         .overlay {
             if model.items.isEmpty {
@@ -496,6 +505,15 @@ public struct HistoryPanelView: View {
         case .moveSelection(let offset):
             return moveSelection(by: offset)
 
+        case .movePage(let direction):
+            return movePage(direction: direction)
+
+        case .moveToFirst:
+            return moveSelection(to: 0)
+
+        case .moveToLast:
+            return moveSelection(to: model.items.count - 1)
+
         case .cycleKind(let offset):
             return cycleKind(by: offset)
 
@@ -518,6 +536,10 @@ public struct HistoryPanelView: View {
 
         case .cancelComparison:
             model.cancelComparison()
+            return .handled
+
+        case .clearSearch:
+            model.searchText = ""
             return .handled
 
         case .delete:
@@ -559,12 +581,29 @@ public struct HistoryPanelView: View {
         model.dismissPanel?()
     }
 
+    private var selectedIndex: Int {
+        model.items.firstIndex { $0.id == model.selection } ?? 0
+    }
+
     private func moveSelection(by offset: Int) -> KeyPress.Result {
+        moveSelection(to: selectedIndex + offset)
+    }
+
+    private func moveSelection(to index: Int) -> KeyPress.Result {
         guard !model.items.isEmpty else { return .ignored }
-        let currentIndex = model.items.firstIndex { $0.id == model.selection } ?? 0
-        let next = min(max(currentIndex + offset, 0), model.items.count - 1)
+        let next = min(max(index, 0), model.items.count - 1)
         model.selection = model.items[next].id
         return .handled
+    }
+
+    private func movePage(direction: Int) -> KeyPress.Result {
+        let target = PanelKeyboard.pageTarget(
+            from: selectedIndex,
+            direction: direction,
+            rowHeights: model.items.map { pageMetrics.rowHeights[$0.id] },
+            viewportHeight: pageMetrics.viewportHeight
+        )
+        return moveSelection(to: target)
     }
 
     private func cycleKind(by offset: Int) -> KeyPress.Result {
@@ -575,6 +614,18 @@ public struct HistoryPanelView: View {
         model.selectedKind = stops[next]
         return .handled
     }
+}
+
+/// What a page is made of: the list's height and the rows' heights.
+///
+/// A plain class rather than state. Both change on every layout pass, and nothing on
+/// screen depends on them — storing them in observed state would redraw the whole list
+/// each time a row was measured, which is every time one scrolls into view.
+@MainActor
+private final class PageMetrics {
+    var viewportHeight: CGFloat = 0
+    /// Keyed by item rather than position, so a height survives the list reloading.
+    var rowHeights: [UUID: CGFloat] = [:]
 }
 
 extension ClipKind {

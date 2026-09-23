@@ -8,6 +8,13 @@ import SwiftUI
 /// left with nothing but the doing.
 public enum PanelCommand: Equatable, Sendable {
     case moveSelection(by: Int)
+    /// Page Up / Page Down: a screenful of rows at a time, backwards for a negative
+    /// direction. How many rows that is depends on the window, so the view works it out
+    /// with ``PanelKeyboard/pageTarget(from:direction:rowHeights:viewportHeight:)``.
+    case movePage(direction: Int)
+    /// ⌘↑ / ⌘↓: the first or the last item.
+    case moveToFirst
+    case moveToLast
     case cycleKind(by: Int)
     /// Return, or Shift-Return for the plain-text variant.
     case paste(plainText: Bool)
@@ -29,11 +36,13 @@ public enum PanelCommand: Equatable, Sendable {
     case compare
     /// Escape, while a clip is marked for comparison.
     case cancelComparison
+    /// Escape, while there is a query.
+    case clearSearch
 }
 
 /// The keys the panel cares about, independent of SwiftUI's `KeyPress`.
 public enum PanelKey: Equatable, Sendable {
-    case up, down, tab, escape, `return`, delete, space
+    case up, down, pageUp, pageDown, tab, escape, `return`, delete, space
     case digit(Int)
     case character(Character)
 }
@@ -53,7 +62,7 @@ public enum PanelKeyboard {
     ///   if ⌫ deletes the selected item or edits the query. Deleting someone's clipboard
     ///   entry because they backspaced over a typo would be unforgivable.
     /// - Parameter isComparing: whether a clip is already marked to compare against,
-    ///   which is what Escape backs out of before it closes the panel.
+    ///   which Escape backs out of before it closes the panel.
     public static func command(
         for key: PanelKey,
         modifiers: PanelModifiers,
@@ -62,17 +71,23 @@ public enum PanelKeyboard {
     ) -> PanelCommand? {
         switch key {
         case .down:
-            return .moveSelection(by: 1)
+            return modifiers.contains(.command) ? .moveToLast : .moveSelection(by: 1)
         case .up:
-            return .moveSelection(by: -1)
+            return modifiers.contains(.command) ? .moveToFirst : .moveSelection(by: -1)
+        case .pageDown:
+            return .movePage(direction: 1)
+        case .pageUp:
+            return .movePage(direction: -1)
         case .tab:
             // ⌃⇥ is what every Mac app uses to change tab, and it leaves plain ⇥ free to
             // go on cycling the kind filter.
             if modifiers.contains(.control) { return .switchTab }
             return .cycleKind(by: modifiers.contains(.shift) ? -1 : 1)
         case .escape:
-            // Escape backs out of a comparison first. Closing the whole panel because
-            // someone changed their mind about a diff loses the search they typed too.
+            // Escape backs out one step at a time, the most recent first: the query, then
+            // a comparison, and only then the panel. Closing the whole panel because
+            // someone wanted to retype a search loses the comparison they set up too.
+            if isSearching { return .clearSearch }
             return isComparing ? .cancelComparison : .dismiss
         case .return:
             if modifiers.contains(.option) { return .transform }
@@ -97,6 +112,52 @@ public enum PanelKeyboard {
             }
         }
     }
+
+    /// Room the list itself puts around every row. The row can only measure its own
+    /// content, so this is added to each one; erring high makes a page slightly short,
+    /// which is the safe way round — a long page skips rows that were never on screen.
+    public static let rowSpacing: CGFloat = 8
+
+    /// Where Page Up or Page Down leaves the selection: the furthest row whose way there
+    /// still fits in one window's height. After the list scrolls to it, it sits at the
+    /// edge the page moved towards, which is where the next page starts from.
+    ///
+    /// - Parameters:
+    ///   - index: the selected row.
+    ///   - direction: positive for Page Down, negative for Page Up.
+    ///   - rowHeights: every row's measured height, in list order. `nil` for a row that
+    ///     has never been laid out — the list is lazy — which counts as the average.
+    ///   - viewportHeight: the visible height of the list.
+    public static func pageTarget(
+        from index: Int,
+        direction: Int,
+        rowHeights: [CGFloat?],
+        viewportHeight: CGFloat
+    ) -> Int {
+        let count = rowHeights.count
+        guard count > 0 else { return 0 }
+        let step = direction < 0 ? -1 : 1
+        let start = min(max(index, 0), count - 1)
+
+        let known = rowHeights.compactMap { $0 }
+        let fallback = known.isEmpty ? 44 : known.reduce(0, +) / CGFloat(known.count)
+
+        var target = start
+        var used: CGFloat = 0
+        var next = start + step
+        while next >= 0, next < count {
+            used += (rowHeights[next] ?? fallback) + rowSpacing
+            guard used <= viewportHeight else { break }
+            target = next
+            next += step
+        }
+        // Always at least one row, so a key press never does nothing while there is
+        // somewhere to go — rows taller than the window would otherwise pin it in place.
+        if target == start {
+            target = min(max(start + step, 0), count - 1)
+        }
+        return target
+    }
 }
 
 public extension PanelKey {
@@ -105,6 +166,8 @@ public extension PanelKey {
         switch keyPress.key {
         case .upArrow: self = .up
         case .downArrow: self = .down
+        case .pageUp: self = .pageUp
+        case .pageDown: self = .pageDown
         case .tab: self = .tab
         case .escape: self = .escape
         case .return: self = .return
