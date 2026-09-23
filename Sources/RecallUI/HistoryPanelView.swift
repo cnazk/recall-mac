@@ -15,6 +15,13 @@ public struct HistoryPanelView: View {
     @FocusState private var searchFocused: Bool
     @State private var transformTarget: ClipItem?
     @State private var pageMetrics = PageMetrics()
+    /// The row whose detail is open. Usually the selection, but a click opens it a moment
+    /// later than it selects — see ``selectionChanged(to:proxy:)``.
+    @State private var expandedID: UUID?
+    /// Set by a click on a row just before it changes the selection, so the change can
+    /// tell a click from an arrow key.
+    @State private var clickedID: UUID?
+    @State private var pendingExpansion: Task<Void, Never>?
 
     public init(model: AppModel, otp: OTPModel? = nil) {
         self.model = model
@@ -317,14 +324,44 @@ public struct HistoryPanelView: View {
                     guard let selected = model.selection else { return }
                     proxy.scrollTo(selected)
                 }
-                .onChange(of: model.selection) { _, selected in
-                    guard let selected else { return }
-                    // No anchor: scroll the least that brings the row into view, rather
-                    // than recentring the list under the pointer on every keystroke.
-                    withAnimation(.easeOut(duration: 0.12)) {
-                        proxy.scrollTo(selected)
-                    }
+                .onChange(of: model.selection, initial: true) { _, selected in
+                    selectionChanged(to: selected, proxy: proxy)
                 }
+        }
+    }
+
+    /// Opens the selected row's detail — at once from the keyboard, and after the
+    /// double-click interval from a click.
+    ///
+    /// Opening it at once on a click moved the row out from under the pointer before the
+    /// second click of a double-click arrived: the detail that was open above collapsed,
+    /// up to 220 points of list went with it, and the new detail opened where the row had
+    /// been. The second click landed in that detail's text and did nothing. Waiting out
+    /// the interval keeps the layout still until a double-click can no longer be coming.
+    private func selectionChanged(to selected: UUID?, proxy: ScrollViewProxy) {
+        pendingExpansion?.cancel()
+        let byClick = selected != nil && selected == clickedID
+        clickedID = nil
+
+        guard byClick else {
+            expandedID = selected
+            reveal(selected, proxy: proxy)
+            return
+        }
+        pendingExpansion = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(NSEvent.doubleClickInterval))
+            guard !Task.isCancelled, model.selection == selected else { return }
+            expandedID = selected
+            reveal(selected, proxy: proxy)
+        }
+    }
+
+    /// No anchor: scroll the least that brings the row into view, rather than recentring
+    /// the list under the pointer on every keystroke.
+    private func reveal(_ id: UUID?, proxy: ScrollViewProxy) {
+        guard let id else { return }
+        withAnimation(.easeOut(duration: 0.12)) {
+            proxy.scrollTo(id)
         }
     }
 
@@ -357,6 +394,7 @@ public struct HistoryPanelView: View {
                 // the pixels the text happens to cover.
                 .onTapGesture {
                     guard model.selection == item.id else {
+                        clickedID = item.id
                         model.selection = item.id
                         return
                     }
@@ -365,7 +403,7 @@ public struct HistoryPanelView: View {
 
                 // The detail opens under the row it belongs to rather than in a pane that
                 // is empty most of the time.
-                if item.id == model.selection {
+                if item.id == expandedID {
                     DetailView(item: item, model: model, isEmbedded: true)
                         .frame(maxHeight: 220, alignment: .top)
                         .padding(.top, 6)
@@ -381,7 +419,7 @@ public struct HistoryPanelView: View {
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
             pageMetrics.viewportHeight = height
         }
-        .animation(.easeOut(duration: 0.12), value: model.selection)
+        .animation(.easeOut(duration: 0.12), value: expandedID)
         .overlay {
             if model.items.isEmpty {
                 ContentUnavailableView(
