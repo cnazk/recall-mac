@@ -8,6 +8,8 @@
 	<string>Recall</string>
 	<key>CFBundleExecutable</key>
 	<string>Recall</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.recall.app</string>
 	<key>CFBundlePackageType</key>

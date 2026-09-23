@@ -1,14 +1,16 @@
 #!/usr/bin/env swift
 //
-//  Draws Recall's icon.
+//  Builds Recall's icons.
 //
-//  The mark is ⌘C — the copy shortcut itself — on a sheet of paper. The looped square
-//  is doing double duty: it is the Command key, and it reads as a mind vector, four
-//  strands crossing and looping back, which is what a clipboard history is.
+//  The app icon is a ring of cards around a stack: everything you copied, circling the
+//  newest item. The artwork is `Resources/AppIcon-source.jpg`, a flat 1024px render on a
+//  white background. A JPEG has no alpha, so this script finds the indigo plate, cuts it
+//  out along Apple's continuous-corner shape, sets it on the macOS icon grid with a soft
+//  shadow, and writes `Resources/AppIcon.icns`.
 //
-//  Everything is constructed geometrically rather than set in a font: no licensing
-//  question over shipping a glyph in an app icon, and the C can be drawn to exactly the
-//  stroke weight of the ⌘ so the pair looks designed instead of typeset.
+//  The menu bar mark is still drawn geometrically — ⌘, the copy shortcut's key — because
+//  a template image has to be a single-colour silhouette, and the card ring is too much
+//  detail at 16 points.
 //
 //  Run with:  swift Scripts/make-icon.swift
 //
@@ -16,21 +18,8 @@
 import CoreGraphics
 import Foundation
 import ImageIO
+import SwiftUI
 import UniformTypeIdentifiers
-
-// MARK: - Palette
-
-enum Palette {
-    /// Warm paper, lit slightly from the top left.
-    static let paperTop = CGColor(red: 0.996, green: 0.988, blue: 0.972, alpha: 1)
-    static let paperBottom = CGColor(red: 0.941, green: 0.918, blue: 0.867, alpha: 1)
-    /// The fold, and the shadow it casts.
-    static let foldFace = CGColor(red: 0.886, green: 0.855, blue: 0.788, alpha: 1)
-    static let foldShadow = CGColor(red: 0.702, green: 0.663, blue: 0.588, alpha: 0.55)
-    /// Ink: a deep indigo rather than black, so it sits warm against the paper.
-    static let ink = CGColor(red: 0.137, green: 0.169, blue: 0.325, alpha: 1)
-    static let inkSoft = CGColor(red: 0.259, green: 0.310, blue: 0.494, alpha: 1)
-}
 
 // MARK: - Geometry
 
@@ -78,138 +67,92 @@ func commandPath(center: CGPoint, width: CGFloat) -> CGPath {
     return path
 }
 
-/// A monoline C, drawn as an arc so it carries the same weight and cap as the ⌘.
-///
-/// The aperture is 80°, which is open enough to read as a C rather than an O at menu bar
-/// sizes, and closed enough not to look like a bracket.
-func letterCPath(center: CGPoint, width: CGFloat) -> CGPath {
-    let path = CGMutablePath()
-    let aperture = CGFloat.pi * (40.0 / 180.0)
-    path.addArc(
-        center: center,
-        radius: width / 2,
-        startAngle: aperture,
-        endAngle: -aperture,
-        clockwise: false
-    )
-    return path
+/// Apple's icon grid: the art sits in a rounded square inset from the canvas, with
+/// continuous corners rather than circular ones.
+func squirclePath(in rect: CGRect) -> CGPath {
+    RoundedRectangle(cornerRadius: rect.width * 0.2237, style: .continuous).path(in: rect).cgPath
 }
 
-/// Apple's icon grid: the art sits in a rounded square inset from the canvas.
-func squirclePath(in rect: CGRect) -> CGPath {
-    CGPath(roundedRect: rect, cornerWidth: rect.width * 0.2237, cornerHeight: rect.width * 0.2237, transform: nil)
+// MARK: - Source artwork
+
+func loadImage(at url: URL) -> CGImage {
+    guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+          let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+        fatalError("could not read \(url.path)")
+    }
+    return image
+}
+
+/// The plate in the source artwork, in the image's own top-left-origin pixels.
+///
+/// Found rather than hard-coded, so a regenerated render only has to replace the JPEG.
+/// The plate is the only dark thing on the canvas: the cards are pale, and the render's
+/// drop shadow never gets below light grey.
+func findPlate(in image: CGImage) -> CGRect {
+    let width = image.width, height = image.height
+    var pixels = [UInt8](repeating: 0, count: width * height * 4)
+    guard let context = CGContext(
+        data: &pixels,
+        width: width,
+        height: height,
+        bitsPerComponent: 8,
+        bytesPerRow: width * 4,
+        space: CGColorSpaceCreateDeviceRGB(),
+        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+    ) else { fatalError("could not scan the source artwork") }
+    context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+    var minX = width, maxX = -1, minY = height, maxY = -1
+    for y in 0..<height {
+        for x in 0..<width {
+            let i = (y * width + x) * 4
+            let luminance = (Int(pixels[i]) * 299 + Int(pixels[i + 1]) * 587 + Int(pixels[i + 2]) * 114) / 1000
+            guard luminance < 160 else { continue }
+            minX = min(minX, x); maxX = max(maxX, x)
+            minY = min(minY, y); maxY = max(maxY, y)
+        }
+    }
+    let plate = CGRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)
+    guard maxX >= 0, abs(plate.width - plate.height) <= 4, plate.width > CGFloat(width) / 2 else {
+        fatalError("expected one square plate in the source artwork, found \(plate)")
+    }
+    return plate
 }
 
 // MARK: - Drawing
 
-func drawIcon(in context: CGContext, size: CGFloat) {
-    let canvas = CGRect(x: 0, y: 0, width: size, height: size)
-    context.clear(canvas)
+/// The finished 1024px icon: the source plate, cut out and placed on Apple's grid.
+func drawIcon(in context: CGContext, artwork: CGImage, plate: CGRect) {
+    let size: CGFloat = 1024
+    context.clear(CGRect(x: 0, y: 0, width: size, height: size))
+    context.interpolationQuality = .high
 
     // Apple's macOS icons leave a margin; 824/1024 is the standard content box.
     let inset = size * 0.0977
-    let plate = canvas.insetBy(dx: inset, dy: inset)
-    let shape = squirclePath(in: plate)
+    let box = CGRect(x: 0, y: 0, width: size, height: size).insetBy(dx: inset, dy: inset)
+    // One pixel in from the render's own edge, where JPEG compression has blended the
+    // indigo into the white canvas; cutting on it leaves a pale outline.
+    let shape = squirclePath(in: box.insetBy(dx: 1, dy: 1))
 
-    // A soft drop shadow so the paper sits on the desktop rather than in it. Kept weak
+    // A soft drop shadow so the icon sits on the desktop rather than in it. Kept weak
     // and wide: a tight dark shadow reads as a border, not as depth.
     context.saveGState()
     context.setShadow(
         offset: CGSize(width: 0, height: -size * 0.016),
         blur: size * 0.055,
-        color: CGColor(red: 0.18, green: 0.16, blue: 0.13, alpha: 0.22)
+        color: CGColor(red: 0.07, green: 0.08, blue: 0.16, alpha: 0.28)
     )
     context.addPath(shape)
-    context.setFillColor(Palette.paperTop)
+    context.setFillColor(CGColor(red: 0.137, green: 0.169, blue: 0.325, alpha: 1))
     context.fillPath()
     context.restoreGState()
 
-    // Paper, lit from the top.
+    // The artwork, scaled so its plate fills the content box exactly.
+    guard let cropped = artwork.cropping(to: plate) else { fatalError("could not crop to \(plate)") }
     context.saveGState()
     context.addPath(shape)
     context.clip()
-
-    let colorSpace = CGColorSpaceCreateDeviceRGB()
-    if let gradient = CGGradient(
-        colorsSpace: colorSpace,
-        colors: [Palette.paperTop, Palette.paperBottom] as CFArray,
-        locations: [0, 1]
-    ) {
-        context.drawLinearGradient(
-            gradient,
-            start: CGPoint(x: plate.minX, y: plate.maxY),
-            end: CGPoint(x: plate.maxX, y: plate.minY),
-            options: []
-        )
-    }
-
-    drawFold(in: context, plate: plate, size: size)
-    context.restoreGState()
-
-    // The mark. Stroke weight is set as a fraction of the ⌘ itself so the loops stay
-    // open — too heavy and the four holes close up into a blob.
-    let markWidth = size * 0.315
-    let strokeWidth = markWidth * 0.155
-    context.setLineWidth(strokeWidth)
-    context.setLineCap(.round)
-    context.setLineJoin(.round)
-    context.setStrokeColor(Palette.ink)
-
-    // The C is matched to the ⌘'s height, not its width, so the two read as one size.
-    let letterWidth = markWidth * 0.80
-    let gap = markWidth * 0.20
-    let totalWidth = markWidth + gap + letterWidth
-    let originX = plate.midX - totalWidth / 2
-    let markCenterY = plate.midY
-
-    let command = commandPath(
-        center: CGPoint(x: originX + markWidth / 2, y: markCenterY),
-        width: markWidth
-    )
-    context.addPath(command)
-    context.strokePath()
-
-    let letter = letterCPath(
-        center: CGPoint(x: originX + markWidth + gap + letterWidth / 2, y: markCenterY),
-        width: letterWidth
-    )
-    context.addPath(letter)
-    context.strokePath()
-}
-
-/// A turned-up corner, which is what makes a rectangle read as paper at 32 pixels.
-///
-/// Drawn as the underside of the sheet — lighter than the fold's shadow, darker than the
-/// page — with the shadow it casts falling up and to the left.
-func drawFold(in context: CGContext, plate: CGRect, size: CGFloat) {
-    let fold = plate.width * 0.30
-    let corner = CGPoint(x: plate.maxX, y: plate.minY)
-
-    // The shadow the lifted corner casts on the sheet.
-    let shadowTriangle = CGMutablePath()
-    shadowTriangle.move(to: CGPoint(x: corner.x - fold, y: corner.y))
-    shadowTriangle.addLine(to: CGPoint(x: corner.x, y: corner.y + fold))
-    shadowTriangle.addLine(to: corner)
-    shadowTriangle.closeSubpath()
-
-    context.saveGState()
-    context.setShadow(
-        offset: CGSize(width: -size * 0.012, height: size * 0.012),
-        blur: size * 0.03,
-        color: Palette.foldShadow
-    )
-    context.addPath(shadowTriangle)
-    context.setFillColor(Palette.foldFace)
-    context.fillPath()
-    context.restoreGState()
-
-    // A highlight along the crease, so the fold has an edge rather than just a tone.
-    context.saveGState()
-    context.setStrokeColor(CGColor(red: 1, green: 1, blue: 1, alpha: 0.7))
-    context.setLineWidth(size * 0.004)
-    context.move(to: CGPoint(x: corner.x - fold, y: corner.y))
-    context.addLine(to: CGPoint(x: corner.x, y: corner.y + fold))
-    context.strokePath()
+    context.draw(cropped, in: box)
     context.restoreGState()
 }
 
@@ -249,9 +192,21 @@ func writePNG(_ image: CGImage, to url: URL) {
 
 let root = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 let iconset = root.appendingPathComponent(".build/icon/AppIcon.iconset")
+try? FileManager.default.removeItem(at: iconset)
 try? FileManager.default.createDirectory(at: iconset, withIntermediateDirectories: true)
 
-// The sizes `iconutil` expects.
+let artwork = loadImage(at: root.appendingPathComponent("Resources/AppIcon-source.jpg"))
+let plate = findPlate(in: artwork)
+
+guard let masterContext = makeContext(size: 1024) else { fatalError("could not allocate the icon") }
+drawIcon(in: masterContext, artwork: artwork, plate: plate)
+guard let master = masterContext.makeImage() else { fatalError("could not render the icon") }
+
+// A large preview, for looking at the thing.
+writePNG(master, to: root.appendingPathComponent(".build/icon/preview.png"))
+
+// The sizes `iconutil` expects. Each is a downscale of the one master, so the cutout
+// and shadow are identical at every size.
 let variants: [(name: String, pixels: Int)] = [
     ("icon_16x16", 16), ("icon_16x16@2x", 32),
     ("icon_32x32", 32), ("icon_32x32@2x", 64),
@@ -262,18 +217,19 @@ let variants: [(name: String, pixels: Int)] = [
 
 for variant in variants {
     guard let context = makeContext(size: variant.pixels) else { continue }
-    drawIcon(in: context, size: CGFloat(variant.pixels))
+    context.interpolationQuality = .high
+    context.draw(master, in: CGRect(x: 0, y: 0, width: variant.pixels, height: variant.pixels))
     guard let image = context.makeImage() else { continue }
     writePNG(image, to: iconset.appendingPathComponent("\(variant.name).png"))
 }
 
-// A large preview, for looking at the thing.
-if let context = makeContext(size: 1024) {
-    drawIcon(in: context, size: 1024)
-    if let image = context.makeImage() {
-        writePNG(image, to: root.appendingPathComponent(".build/icon/preview.png"))
-    }
-}
+let icns = root.appendingPathComponent("Resources/AppIcon.icns")
+let iconutil = Process()
+iconutil.executableURL = URL(fileURLWithPath: "/usr/bin/iconutil")
+iconutil.arguments = ["-c", "icns", iconset.path, "-o", icns.path]
+try iconutil.run()
+iconutil.waitUntilExit()
+guard iconutil.terminationStatus == 0 else { fatalError("iconutil failed") }
 
 // The menu bar template, as a PDF so it stays sharp at any scale.
 let pdfURL = root.appendingPathComponent("Resources/MenuBarIcon.pdf")
@@ -293,4 +249,4 @@ if let context = makeContext(size: 36) {
     }
 }
 
-print("Wrote \(iconset.path) and Resources/MenuBarIcon.pdf")
+print("Wrote Resources/AppIcon.icns and Resources/MenuBarIcon.pdf (plate found at \(plate))")
