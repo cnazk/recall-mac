@@ -27,6 +27,7 @@ expander that runs on your Mac.
 - [What never leaves your Mac](#what-never-leaves-your-mac)
 - [Install](#install)
 - [Status](#status)
+- [Support Recall](#support-recall)
 - [License](#license)
 
 ---
@@ -342,6 +343,44 @@ to fix, and saying so is more useful than a promise that never lands.
 | **The Accessibility grant is lost on every update** — an ad-hoc signature is pinned to the build hash, so macOS sees each build as a different app | **Fixed by the same change.** A Developer ID signature is stable across versions, and the grant survives. |
 | **No Persian OCR** — macOS Vision ships no `fa` recogniser | **Not ours to fix.** Automatic language detection is on, and Arabic-script *search* is folded so Persian text you paste is findable. Recognition waits on Apple. |
 | **Shortcodes do not expand in password fields** | **Working as intended.** macOS enables Secure Event Input there, which blocks the event tap Recall listens on. That is the OS protecting you from exactly the class of software Recall is, and Recall will not work around it. |
+
+---
+
+## Support Recall
+
+Recall is free and open source, and it will stay that way. The app itself never asks for money:
+there is no donate button, reminder or nag anywhere in it, so nothing gets between you and
+your clipboard. If Recall is useful to you and you would like to support its development,
+this is the place.
+
+**Coffee Bede** — with an Iranian bank card: [coffeebede.com/cnazk](https://www.coffeebede.com/cnazk)
+
+**Crypto** — copy each address rather than retyping it, and send only on the network named
+above it. Coins sent on any other network are lost.
+
+**TRON** — TRX, or TRC-20 tokens such as USDT
+
+```
+TLnL9hAHDUPXHioByrwQu656bTv22u3yfC
+```
+
+**Ethereum** — ETH, or ERC-20 tokens such as USDT
+
+```
+0x658A5337D273A73B3BBF72fD536086BBA7E1BB02
+```
+
+**Bitcoin**
+
+```
+bc1q8thgzqfg8uakvdfzykkhllq72hdmlwh2v5jtsw
+```
+
+**Solana** — SOL, or SPL tokens such as USDT
+
+```
+8w1efp2YQ4kv1eFWugXJ3fF3gfNJtcFpjz1jBVmGprgq
+```
 
 ---
 

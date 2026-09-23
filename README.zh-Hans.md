@@ -26,6 +26,7 @@ Recall 会记住你拷贝的一切，让你按*含义*而不是按原文字词�
 - [永远不会离开你 Mac 的内容](#永远不会离开你-mac-的内容)
 - [安装](#安装)
 - [状态](#状态)
+- [支持 Recall](#支持-recall)
 - [许可证](#许可证)
 
 ---
@@ -259,6 +260,40 @@ make run    # 构建并启动
 | **每次更新都会丢失辅助功能授权**——ad-hoc 签名与构建哈希绑定，macOS 会把每个构建视为不同的 App | **会随同一项改动一并修复。** Developer ID 签名在不同版本间保持稳定，授权也会保留。 |
 | **不支持波斯语 OCR**——macOS 的 Vision 没有 `fa` 识别器 | **不是我们能修复的。** 自动语言检测已开启，阿拉伯字母的*搜索*会做规范化处理，因此你粘贴的波斯语文本可以被找到。文字识别有待 Apple 支持。 |
 | **短代码不会在密码字段中展开** | **按设计如此。** macOS 在那里开启了 Secure Event Input，它会阻止 Recall 所使用的事件监听器。这是操作系统在保护你免受 Recall 这类软件的影响，Recall 不会绕过它。 |
+
+---
+
+## 支持 Recall
+
+Recall 免费且开源，并将一直如此。App 本身从不向你索要任何费用：其中没有捐赠按钮、提醒或打扰——不会有任何东西挡在你和剪贴板之间。如果 Recall 对你有用，而你愿意支持它的开发，可以在这里进行。
+
+**Coffee Bede**——使用伊朗银行卡：[coffeebede.com/cnazk](https://www.coffeebede.com/cnazk)
+
+**加密货币**——请拷贝地址，不要手动输入，并且只通过地址上方注明的网络发送。通过其他网络发送的币将会丢失。
+
+**TRON**——TRX，或 USDT 等 TRC-20 代币
+
+```
+TLnL9hAHDUPXHioByrwQu656bTv22u3yfC
+```
+
+**Ethereum**——ETH，或 USDT 等 ERC-20 代币
+
+```
+0x658A5337D273A73B3BBF72fD536086BBA7E1BB02
+```
+
+**Bitcoin**
+
+```
+bc1q8thgzqfg8uakvdfzykkhllq72hdmlwh2v5jtsw
+```
+
+**Solana**——SOL，或 USDT 等 SPL 代币
+
+```
+8w1efp2YQ4kv1eFWugXJ3fF3gfNJtcFpjz1jBVmGprgq
+```
 
 ---
 
