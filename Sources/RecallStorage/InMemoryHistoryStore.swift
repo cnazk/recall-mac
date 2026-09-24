@@ -5,8 +5,9 @@ import RecallCore
 ///
 /// This is both the In-Memory Mode implementation and the store the tests run against.
 /// Items are held newest-first; pinned items always sort above unpinned ones.
-public actor InMemoryHistoryStore: HistoryStore {
+public actor InMemoryHistoryStore: HistoryStore, TodoStore {
     private var storage: [ClipItem] = []
+    private var todoStorage: [UUID: TodoItem] = [:]
     private var indexByHash: [ContentHash: UUID] = [:]
 
     public init() {}
@@ -174,5 +175,33 @@ public actor InMemoryHistoryStore: HistoryStore {
     /// Always zero: In-Memory Mode's whole promise is that there is nothing on disk.
     public var footprint: Int64 {
         get throws { 0 }
+    }
+
+    // MARK: - Todos
+
+    public func todos() throws -> [TodoItem] {
+        todoStorage.values.sorted(by: TodoItem.displayOrder)
+    }
+
+    public func saveTodo(_ todo: TodoItem) throws {
+        todoStorage[todo.id] = todo
+    }
+
+    public func reorderTodos(_ ids: [UUID]) throws {
+        for (position, id) in ids.enumerated() {
+            guard let todo = todoStorage[id], !todo.isDone else { continue }
+            todoStorage[id]?.order = (position + 1) * TodoItem.orderSpacing
+        }
+    }
+
+    public func deleteTodo(id: UUID) throws {
+        todoStorage[id] = nil
+    }
+
+    @discardableResult
+    public func deleteCompletedTodos() throws -> Int {
+        let done = todoStorage.values.filter(\.isDone).map(\.id)
+        for id in done { todoStorage[id] = nil }
+        return done.count
     }
 }

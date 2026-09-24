@@ -358,6 +358,70 @@
         }
       }
     },
+    "%lld to do" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld to do"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld to do"
+                }
+              }
+            }
+          }
+        },
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "‏%lld کار مانده"
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld задачи"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld задач"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld задача"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld задачи"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 项待办"
+          }
+        }
+      }
+    },
     "%lld words added" : {
       "localizations" : {
         "en" : {
@@ -1431,6 +1495,50 @@
         }
       }
     },
+    "Add to Todos" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "افزودن به کارها"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить в задачи"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加到待办"
+          }
+        }
+      }
+    },
+    "Added to Todos" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "به کارها افزوده شد"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавлено в задачи"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已添加到待办"
+          }
+        }
+      }
+    },
     "Advanced" : {
       "localizations" : {
         "fa" : {
@@ -1537,6 +1645,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "所有处理都在设备上完成，任何内容都不会发送到服务器。"
+          }
+        }
+      }
+    },
+    "Already in Todos" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "از قبل در کارها هست"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Уже есть в задачах"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已在待办中"
           }
         }
       }
@@ -2619,6 +2749,28 @@
         }
       }
     },
+    "Delete every finished todo" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حذف همهٔ کارهای انجام‌شده"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Удалить все выполненные задачи"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除所有已完成的待办"
+          }
+        }
+      }
+    },
     "Delete items after" : {
       "localizations" : {
         "fa" : {
@@ -3282,28 +3434,6 @@
         }
       }
     },
-    "History or two-factor codes (⌃⇥)" : {
-      "localizations" : {
-        "fa" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تاریخچه یا کدهای تأیید دومرحله‌ای (⌃⇥)"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "История или коды 2FA (⌃⇥)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "历史记录或双重认证代码（⌃⇥）"
-          }
-        }
-      }
-    },
     "History size" : {
       "localizations" : {
         "fa" : {
@@ -3322,6 +3452,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "历史记录大小"
+          }
+        }
+      }
+    },
+    "History, two-factor codes or todos (⌃⇥)" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تاریخچه، کدهای تأیید دومرحله‌ای یا کارها (⌃⇥)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "История, коды 2FA или задачи (⌃⇥)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "历史记录、双重认证代码或待办（⌃⇥）"
           }
         }
       }
@@ -3526,6 +3678,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "仅在内存中"
+          }
+        }
+      }
+    },
+    "In-Memory Mode is on: todos are erased when Recall quits." : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حالت فقط حافظه روشن است: کارها با بسته شدن Recall پاک می‌شوند."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включён режим «Только в памяти»: задачи удаляются при выходе из Recall."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅内存模式已开启：退出 Recall 时会清除待办。"
           }
         }
       }
@@ -4059,6 +4233,50 @@
         }
       }
     },
+    "Mark as Done" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "علامت‌گذاری به‌عنوان انجام‌شده"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отметить как выполненную"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "标记为已完成"
+          }
+        }
+      }
+    },
+    "Mark as Not Done" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "علامت‌گذاری به‌عنوان انجام‌نشده"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отметить как невыполненную"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "标记为未完成"
+          }
+        }
+      }
+    },
     "Matching text (optional)" : {
       "localizations" : {
         "fa" : {
@@ -4275,6 +4493,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新建集合"
+          }
+        }
+      }
+    },
+    "New todo" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کار جدید"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая задача"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新待办"
           }
         }
       }
@@ -4539,6 +4779,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未选择任何内容"
+          }
+        }
+      }
+    },
+    "Nothing to do" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کاری نمانده"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задач нет"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有待办"
           }
         }
       }
@@ -4873,6 +5135,28 @@
         }
       }
     },
+    "Paste Clip" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "چسباندن مورد"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вставить фрагмент"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粘贴剪贴项"
+          }
+        }
+      }
+    },
     "Paste Setup Link" : {
       "localizations" : {
         "fa" : {
@@ -5067,6 +5351,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "按顺序粘贴多个项"
+          }
+        }
+      }
+    },
+    "Paste the clip this came from (⌘↩)" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "چسباندن موردی که این کار از آن ساخته شد (⌘↩)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вставить фрагмент, из которого создана задача (⌘↩)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粘贴此待办来源的剪贴项（⌘↩）"
           }
         }
       }
@@ -5597,6 +5903,28 @@
         }
       }
     },
+    "Recall could not save that todo." : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recall نتوانست این کار را ذخیره کند."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recall не удалось сохранить задачу."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recall 无法保存该待办。"
+          }
+        }
+      }
+    },
     "Recall did not save it to history. Add it to your codes?" : {
       "localizations" : {
         "fa" : {
@@ -5791,6 +6119,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "移除…"
+          }
+        }
+      }
+    },
+    "Rename" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تغییر نام"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переименовать"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重命名"
           }
         }
       }
@@ -7216,6 +7566,28 @@
         }
       }
     },
+    "The clip this came from is no longer in history." : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "موردی که این کار از آن ساخته شد دیگر در تاریخچه نیست."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фрагмента, из которого создана задача, больше нет в истории."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此待办来源的剪贴项已不在历史记录中。"
+          }
+        }
+      }
+    },
     "The helper that holds your two-factor secrets could not be reached." : {
       "localizations" : {
         "fa" : {
@@ -7656,6 +8028,50 @@
         }
       }
     },
+    "Todo" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کار"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задача"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "待办"
+          }
+        }
+      }
+    },
+    "Todos" : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کارها"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задачи"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "待办"
+          }
+        }
+      }
+    },
     "Try Again" : {
       "localizations" : {
         "fa" : {
@@ -7894,6 +8310,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在任意位置输入 :sig 这样的短代码，Recall 就会将其替换为该项。"
+          }
+        }
+      }
+    },
+    "Type a todo above, or press ⌘T on a clip in History." : {
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "کاری را در بالا بنویسید، یا روی موردی در تاریخچه ⌘T را فشار دهید."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Введите задачу выше или нажмите ⌘T на фрагменте в истории."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在上方输入待办，或在历史记录中的剪贴项上按下 ⌘T。"
           }
         }
       }
@@ -8338,6 +8776,29 @@
         }
       }
     },
+    "add" : {
+      "comment" : "Todos footer hint: Return adds the typed todo",
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "افزودن"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "добавить"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加"
+          }
+        }
+      }
+    },
     "alex@example.com" : {
       "shouldTranslate" : false
     },
@@ -8472,6 +8933,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "比较"
+          }
+        }
+      }
+    },
+    "delete" : {
+      "comment" : "Todos footer hint: what ⌫ does",
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حذف"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "удалить"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除"
+          }
+        }
+      }
+    },
+    "done" : {
+      "comment" : "Todos footer hint: Return ticks off the selected todo",
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انجام شد"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "выполнено"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成"
           }
         }
       }
@@ -8681,6 +9188,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "粘贴"
+          }
+        }
+      }
+    },
+    "paste clip" : {
+      "comment" : "Todos footer hint: ⌘Return pastes the clip a todo came from",
+      "localizations" : {
+        "fa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "چسباندن مورد"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "вставить фрагмент"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粘贴剪贴项"
           }
         }
       }

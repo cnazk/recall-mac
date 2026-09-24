@@ -71,6 +71,7 @@ final class StatusMenu {
 
         add(to: menu, String(localized: "Scratchpad"), #selector(MenuActions.toggleScratchpad(_:)), key: "v", modifiers: [.command, .option])
         add(to: menu, String(localized: "Two-Factor Codes"), #selector(MenuActions.showCodes(_:)), key: "a", modifiers: [.command, .shift])
+        add(to: menu, String(localized: "Todos"), #selector(MenuActions.showTodos(_:)))
         add(to: menu, String(localized: "Capture Text from Screen"), #selector(MenuActions.captureText(_:)),
             key: "2", modifiers: [.command, .shift, .option])
 
@@ -148,6 +149,7 @@ private final class MenuActions: NSObject {
     @objc func showPanel(_ sender: Any?) { onMain { $0.showPanel() } }
     @objc func toggleScratchpad(_ sender: Any?) { onMain { $0.toggleScratchpad() } }
     @objc func showCodes(_ sender: Any?) { onMain { $0.showCodes() } }
+    @objc func showTodos(_ sender: Any?) { onMain { $0.showTodos() } }
     @objc func approveLoginItem(_ sender: Any?) { onMain { _ in LoginItem.openSystemSettings() } }
     @objc func clearHistory(_ sender: Any?) { onMain { $0.confirmClearHistory() } }
     @objc func captureText(_ sender: Any?) {

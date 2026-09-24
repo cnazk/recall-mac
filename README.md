@@ -21,6 +21,7 @@ expander that runs on your Mac.
 - [Secrets are treated as radioactive](#secrets-are-treated-as-radioactive)
 - [Two-factor codes](#two-factor-codes)
 - [Snippets and shortcodes](#snippets-and-shortcodes)
+- [Todos](#todos)
 - [Text out of pictures](#text-out-of-pictures)
 - [The rest of it](#the-rest-of-it)
 - [Keyboard](#keyboard)
@@ -219,6 +220,23 @@ interrupts the pin.
 
 ---
 
+## Todos
+
+The panel's third tab is a todo list. Type one and press Return; tick it off with Return
+again, or with a click. Drag to reorder. Finished todos wait under **Done** until you
+clear them.
+
+Press **⌘T** on a clip in History to make it a todo. The todo keeps its own copy of the
+text, because history deletes clips on its own schedule and a todo should not vanish
+with one. While the clip is still around, **⌘⏎** pastes it straight from the todo. A clip
+marked secret cannot become a todo.
+
+Todos are sealed in the same encrypted database as history, and nothing about them is
+stored in the clear, not even when they were written. Clearing history never touches
+them. In In-Memory Mode they live in RAM and are gone when Recall quits.
+
+---
+
 ## Text out of pictures
 
 **⌘⇧⌥2** drags out a region of the screen, Vision reads it, and the text lands on your
@@ -267,10 +285,12 @@ Language detection is automatic rather than pinned to English.
 | ⌘↑ ⌘↓ | Jump to the first or last item |
 | ⏎ | Paste |
 | ⇥ | Cycle by kind |
+| ⌃⇥ | Next tab: History, Codes, Todos |
 | ⌥⏎ | Paste as… |
 | ⌘P | Pin |
 | ⌘Y | Quick Look |
 | ⌘D | Compare two clips |
+| ⌘T | Make the clip a todo |
 | ⌘1…9 | Paste a numbered slot |
 | ⌘⌥1…9 | Assign a clip to a slot |
 | ⎋ | Clear the search, or dismiss |

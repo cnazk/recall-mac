@@ -12,6 +12,7 @@ import SwiftUI
 public struct HistoryPanelView: View {
     @Bindable private var model: AppModel
     private let otp: OTPModel?
+    private let todos: TodoModel?
     @FocusState private var searchFocused: Bool
     @State private var transformTarget: ClipItem?
     @State private var pageMetrics = PageMetrics()
@@ -22,10 +23,15 @@ public struct HistoryPanelView: View {
     /// tell a click from an arrow key.
     @State private var clickedID: UUID?
     @State private var pendingExpansion: Task<Void, Never>?
+    /// Replaces the item count in the footer for a moment, to confirm something that
+    /// happened out of sight — a todo made from a clip lands in another tab.
+    @State private var footerNotice: String?
+    @State private var footerNoticeTask: Task<Void, Never>?
 
-    public init(model: AppModel, otp: OTPModel? = nil) {
+    public init(model: AppModel, otp: OTPModel? = nil, todos: TodoModel? = nil) {
         self.model = model
         self.otp = otp
+        self.todos = todos
     }
 
     public var body: some View {
@@ -35,6 +41,9 @@ public struct HistoryPanelView: View {
             if model.panelTab == .codes, let otp {
                 Divider()
                 CodesView(model: otp)
+            } else if model.panelTab == .todos, let todos {
+                Divider()
+                TodosView(model: todos, openCount: model.panelOpenCount)
             } else {
                 history
             }
@@ -44,8 +53,8 @@ public struct HistoryPanelView: View {
         // stacking glass on glass muddies both layers and is the usual way this material
         // is overdone.
         .glassSurface(settings: model.settings)
-        // Above the branch, so ⌃⇥ works from either tab. The per-tab handlers below only
-        // ever see their own half.
+        // Above the branch, so ⌃⇥ works from every tab. The per-tab handlers below only
+        // ever see their own part.
         .onKeyPress(phases: .down) { handle($0) }
         // …and a real shortcut as well, because `onKeyPress` never sees Tab: SwiftUI
         // takes it for focus navigation before any handler runs. A keyboard shortcut goes
@@ -70,16 +79,20 @@ public struct HistoryPanelView: View {
     /// ⌃⇥, as an invisible command rather than a key handler. See ``body``.
     @ViewBuilder
     private var tabShortcut: some View {
-        if otp != nil {
+        if hasTabs {
             Button("Switch Tab") { toggleTab() }
                 .keyboardShortcut(.tab, modifiers: .control)
                 .hidden()
         }
     }
 
+    private var hasTabs: Bool {
+        otp != nil || todos != nil
+    }
+
     private func toggleTab() {
-        guard otp != nil else { return }
-        model.panelTab = model.panelTab == .history ? .codes : .history
+        guard hasTabs else { return }
+        model.panelTab = model.panelTab.next(hasCodes: otp != nil, hasTodos: todos != nil)
     }
 
     private var history: some View {
@@ -109,6 +122,11 @@ public struct HistoryPanelView: View {
         // and reused, so after a single click on a row the focus stayed in the list for
         // the rest of the session and reopening gave you nowhere to type.
         .onChange(of: model.panelOpenCount) { focusSearch() }
+        // The search field only exists on this tab, so coming back to it is another
+        // moment the caret has to be put back.
+        .onChange(of: model.panelTab) { _, tab in
+            if tab == .history { focusSearch() }
+        }
         // Also on the container: once a click moves focus into the list, key presses stop
         // reaching the search field's handler.
         .onKeyPress(phases: .down) { handle($0) }
@@ -141,50 +159,63 @@ public struct HistoryPanelView: View {
     /// One bar, tall enough to be the obvious place to start typing.
     private var searchBar: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass")
-                .font(.title3)
-                .foregroundStyle(.tertiary)
+            // History's own controls, on History only. On the other tabs a search field
+            // would filter a list nobody can see, and each of them has a field of its own.
+            if model.panelTab == .history {
+                Image(systemName: "magnifyingglass")
+                    .font(.title3)
+                    .foregroundStyle(.tertiary)
 
-            TextField("Search history", text: $model.searchText)
-                .textFieldStyle(.plain)
-                .font(.title3)
-                .focused($searchFocused)
-                .onKeyPress(phases: .down) { handle($0) }
-                // A TextField swallows Return before `onKeyPress` sees it, so the most
-                // important key in the panel needs its own hook.
-                .onSubmit { pasteSelection() }
+                TextField("Search history", text: $model.searchText)
+                    .textFieldStyle(.plain)
+                    .font(.title3)
+                    .focused($searchFocused)
+                    .onKeyPress(phases: .down) { handle($0) }
+                    // A TextField swallows Return before `onKeyPress` sees it, so the most
+                    // important key in the panel needs its own hook.
+                    .onSubmit { pasteSelection() }
 
-            if model.indexingRemaining > 0 {
-                ProgressView()
-                    .controlSize(.small)
-                    .help("Indexing \(model.indexingRemaining) item(s) for search by meaning")
-            }
-            if model.isModelAvailable {
-                // A button, not a badge. It sits in a row of controls and is shaped like
-                // one, so doing nothing when clicked reads as broken.
-                Button {
-                    SettingsNavigator.shared.open(.intelligence)
-                } label: {
-                    Image(systemName: "sparkles")
-                        .foregroundStyle(.secondary)
+                if model.indexingRemaining > 0 {
+                    ProgressView()
+                        .controlSize(.small)
+                        .help("Indexing \(model.indexingRemaining) item(s) for search by meaning")
                 }
-                .buttonStyle(.plain)
-                .help("Search by meaning and AI actions are on. Click for Intelligence settings.")
+                if model.isModelAvailable {
+                    // A button, not a badge. It sits in a row of controls and is shaped like
+                    // one, so doing nothing when clicked reads as broken.
+                    Button {
+                        SettingsNavigator.shared.open(.intelligence)
+                    } label: {
+                        Image(systemName: "sparkles")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Search by meaning and AI actions are on. Click for Intelligence settings.")
+                }
+
+                filterMenu
+            } else {
+                Spacer()
             }
 
-            filterMenu
-
-            if otp != nil {
+            if hasTabs {
                 Picker("", selection: $model.panelTab) {
                     Image(systemName: "clock.arrow.circlepath").tag(PanelTab.history)
-                    Image(systemName: "lock.shield").tag(PanelTab.codes)
+                    if otp != nil {
+                        Image(systemName: "lock.shield").tag(PanelTab.codes)
+                    }
+                    if todos != nil {
+                        Image(systemName: "checklist").tag(PanelTab.todos)
+                    }
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .fixedSize()
-                .help("History or two-factor codes (⌃⇥)")
+                .help("History, two-factor codes or todos (⌃⇥)")
             }
         }
+        // The same height on every tab, so switching does not move everything below.
+        .frame(minHeight: 26)
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         // The search bar is the panel's title bar — there is no other, since the window
@@ -468,7 +499,33 @@ public struct HistoryPanelView: View {
     ]
 
     private var countText: String {
-        String(localized: "\(model.items.count) items")
+        footerNotice ?? String(localized: "\(model.items.count) items")
+    }
+
+    private func showFooterNotice(_ notice: String) {
+        footerNotice = notice
+        footerNoticeTask?.cancel()
+        footerNoticeTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            footerNotice = nil
+        }
+    }
+
+    /// ⌘T. Makes a todo from the clip, and says so, since the todo appears in a tab that
+    /// is not the one on screen.
+    private func addToTodos(_ item: ClipItem) {
+        guard let todos else { return }
+        Task {
+            switch await todos.add(from: item) {
+            case .added:
+                showFooterNotice(String(localized: "Added to Todos"))
+            case .alreadyThere:
+                showFooterNotice(String(localized: "Already in Todos"))
+            case .refused:
+                break
+            }
+        }
     }
 
     @ViewBuilder
@@ -492,6 +549,11 @@ public struct HistoryPanelView: View {
                     }
                 }
             }
+        }
+
+        if todos != nil, item.sensitivity == .normal {
+            Button("Add to Todos") { addToTodos(item) }
+                .keyboardShortcut("t", modifiers: .command)
         }
 
         if model.settings.pasteStackEnabled {
@@ -537,6 +599,10 @@ public struct HistoryPanelView: View {
             isComparing: model.isComparing
         )
         guard let command else { return .ignored }
+        // Above the branch, this handler sees keys from every tab. The others deal with
+        // their own, and from here only get ⌃⇥ — or ⌘P on the Codes tab pins a clip
+        // nobody can see.
+        guard model.panelTab == .history || command == .switchTab else { return .ignored }
         return perform(command)
     }
 
@@ -610,8 +676,13 @@ public struct HistoryPanelView: View {
             return .handled
 
         case .switchTab:
-            guard otp != nil else { return .ignored }
+            guard hasTabs else { return .ignored }
             toggleTab()
+            return .handled
+
+        case .addToTodos:
+            guard todos != nil, let item = model.selectedItem, item.sensitivity == .normal else { return .ignored }
+            addToTodos(item)
             return .handled
         }
     }

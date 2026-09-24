@@ -11,7 +11,7 @@ import RecallCore
 /// What remains in the clear is what has to be queried without doing a full decrypt —
 /// timestamps, kind, the pinned and sensitivity flags, snippet shortcodes. See
 /// `docs/adr/0004-encryption-at-rest.md` for why that floor is where it is.
-public actor SQLiteHistoryStore: HistoryStore {
+public actor SQLiteHistoryStore: HistoryStore, TodoStore {
     /// Images larger than this are offloaded to the blob store.
     public static let imageInlineByteLimit = 512 * 1024
 
@@ -401,7 +401,61 @@ public actor SQLiteHistoryStore: HistoryStore {
             .filter { !$0.indexableText.isEmpty }
     }
 
+    // MARK: - Todos
+
+    /// Todos are not history: clearing history, retention and expiry never touch them.
+    /// A todo is something the user wrote down on purpose, like a pin.
+    public func todos() throws -> [TodoItem] {
+        try allTodos().sorted(by: TodoItem.displayOrder)
+    }
+
+    public func saveTodo(_ todo: TodoItem) throws {
+        try writeTodo(todo)
+    }
+
+    public func reorderTodos(_ ids: [UUID]) throws {
+        let byID = Dictionary(uniqueKeysWithValues: try allTodos().map { ($0.id, $0) })
+        try database.transaction {
+            for (position, id) in ids.enumerated() {
+                guard var todo = byID[id], !todo.isDone else { continue }
+                todo.order = (position + 1) * TodoItem.orderSpacing
+                try writeTodo(todo)
+            }
+        }
+    }
+
+    public func deleteTodo(id: UUID) throws {
+        try database.run("DELETE FROM todos WHERE id = ?;", [.text(id.uuidString)])
+    }
+
+    @discardableResult
+    public func deleteCompletedTodos() throws -> Int {
+        let done = try allTodos().filter(\.isDone)
+        try database.transaction {
+            for todo in done {
+                try database.run("DELETE FROM todos WHERE id = ?;", [.text(todo.id.uuidString)])
+            }
+        }
+        return done.count
+    }
+
     // MARK: - Private
+
+    private func allTodos() throws -> [TodoItem] {
+        try database.query("SELECT body FROM todos;") { row in
+            try decoder.decode(TodoItem.self, from: try sealer.open(row.data(0)))
+        }
+    }
+
+    private func writeTodo(_ todo: TodoItem) throws {
+        try database.run(
+            """
+            INSERT INTO todos (id, body) VALUES (?, ?)
+            ON CONFLICT(id) DO UPDATE SET body = excluded.body;
+            """,
+            [.text(todo.id.uuidString), .blob(try sealer.seal(try encoder.encode(todo)))]
+        )
+    }
 
     private func allItems() throws -> [ClipItem] {
         try database.query("SELECT body FROM items;") { try decode($0.data(0)) }

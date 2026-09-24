@@ -52,7 +52,7 @@ public final class AppModel {
     /// has to be reset afterwards is a flag that will one day not be.
     public private(set) var panelOpenCount = 0
 
-    /// Which half of the panel is showing. Held here so ⌘⇧A can switch a panel that is
+    /// Which part of the panel is showing. Held here so ⌘⇧A can switch a panel that is
     /// already open rather than building a second one.
     public var panelTab: PanelTab = .history
     /// Set to open the shortcode sheet for an item, from wherever the user asked.
@@ -326,6 +326,17 @@ public final class AppModel {
         try? await store.markUsed(id: item.id, at: .now)
         Log.paste.info("Pasted a \(item.kind.rawValue, privacy: .public) clip")
         await reload()
+    }
+
+    /// Pastes the clip with `id`, for a todo made from it.
+    ///
+    /// - Returns: false when history no longer has it — retention, expiry and the item
+    ///   limit all delete clips without asking, and a todo outlives them on purpose.
+    @discardableResult
+    public func pasteClip(id: UUID) async -> Bool {
+        guard let item = try? await store.item(id: id) else { return false }
+        await paste(item)
+        return true
     }
 
     /// Pastes pinned slot `slot` (1-based), for ⌘1–9 in the panel and ⌘⇧1–9 globally.
@@ -652,8 +663,17 @@ public final class AppModel {
     }
 }
 
-/// Which half of the panel is showing.
-public enum PanelTab: String, Hashable, Sendable {
+/// Which part of the panel is showing.
+public enum PanelTab: String, Hashable, Sendable, CaseIterable {
     case history
     case codes
+    case todos
+
+    /// Where ⌃⇥ goes from here: each tab in picker order, wrapping round, and skipping
+    /// any the panel was built without.
+    public func next(hasCodes: Bool, hasTodos: Bool) -> PanelTab {
+        let tabs = Self.allCases.filter { ($0 != .codes || hasCodes) && ($0 != .todos || hasTodos) }
+        let index = tabs.firstIndex(of: self) ?? 0
+        return tabs[(index + 1) % tabs.count]
+    }
 }

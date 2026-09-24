@@ -29,8 +29,10 @@ public enum PanelCommand: Equatable, Sendable {
     case assignSlot(Int)
     /// Space (or ⌘Y): preview the selection in Quick Look.
     case quickLook
-    /// ⌃⇥: swap between history and two-factor codes.
+    /// ⌃⇥: move on to the next tab — history, two-factor codes, todos.
     case switchTab
+    /// ⌘T: make a todo from the selection.
+    case addToTodos
     /// ⌘D: mark the selection as the clip to compare against, or — with one already
     /// marked — open the comparison.
     case compare
@@ -108,6 +110,7 @@ public enum PanelKeyboard {
             case "p": return .togglePin
             case "y": return .quickLook
             case "d": return .compare
+            case "t": return .addToTodos
             default: return nil
             }
         }

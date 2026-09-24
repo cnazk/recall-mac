@@ -36,6 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Hot-key registrations held only while the paste stack is switched on.
     private var pasteStackHotKeys: [UInt32] = []
     private(set) var otpModel: OTPModel?
+    private var todoModel: TodoModel?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Agent app: no Dock icon, no menu bar of its own.
@@ -172,17 +173,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                         // silently downgrades search to literal matching — with no warning
                         // anywhere, which cost a demo recording to find.
                         let sqlite = try SQLiteHistoryStore(url: nil, keyStore: EphemeralKeyStore())
-                        continuation.resume(returning: OpenedStore(store: sqlite, sqlite: sqlite))
+                        continuation.resume(returning: OpenedStore(store: sqlite, todos: sqlite, sqlite: sqlite))
                         return
                     }
                     switch mode {
                     case .persistent:
                         let sqlite = try SQLiteHistoryStore(url: try SQLiteHistoryStore.defaultURL())
-                        continuation.resume(returning: OpenedStore(store: sqlite, sqlite: sqlite))
+                        continuation.resume(returning: OpenedStore(store: sqlite, todos: sqlite, sqlite: sqlite))
                     case .inMemory:
                         // In-Memory Mode: no database file, no blob directory, no key.
                         // There is nothing to encrypt because there is nothing on disk.
-                        continuation.resume(returning: OpenedStore(store: InMemoryHistoryStore(), sqlite: nil))
+                        let memory = InMemoryHistoryStore()
+                        continuation.resume(returning: OpenedStore(store: memory, todos: memory, sqlite: nil))
                     }
                 } catch {
                     continuation.resume(throwing: error)
@@ -204,6 +206,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private struct OpenedStore: Sendable {
         let store: any HistoryStore
+        /// The same store as ``store``: todos follow the storage mode, so they are sealed
+        /// in the same database or held in the same RAM.
+        let todos: any TodoStore
         let sqlite: SQLiteHistoryStore?
     }
 
@@ -327,7 +332,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             settingsWindow?.show(tab: tab)
         }
 
-        let panel = PanelController { HistoryPanelView(model: model, otp: otpModel) }
+        let todoModel = TodoModel(store: opened.todos, isInMemory: opened.sqlite == nil)
+        todoModel.pasteClip = { [weak model] id in await model?.pasteClip(id: id) ?? false }
+        self.todoModel = todoModel
+
+        let panel = PanelController { HistoryPanelView(model: model, otp: otpModel, todos: todoModel) }
         self.panel = panel
 
         // Pasting has to land in the app the user was in, not in Recall. The model asks
@@ -337,6 +346,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.onHide = { [weak otpModel] in otpModel?.forgetCodes() }
         panel.onShow = { [weak model] in model?.panelDidOpen() }
         otpModel.dismissPanel = { [weak panel] in panel?.hide() }
+        todoModel.dismissPanel = { [weak panel] in panel?.hide() }
         // A Touch ID prompt takes key from the panel; without this the panel hides
         // itself mid-prompt and the app looks like it fell over.
         otpModel.onAuthenticationPrompt = { [weak panel] isPrompting in
@@ -422,6 +432,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     await otp.remove(added)
                     Log.ui.info("Import self-test: cleaned up")
                 }
+            }
+        }
+
+        // `--show-todos` opens the panel on the Todos tab, for the same reason.
+        if CommandLine.arguments.contains("--show-todos") {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(3))
+                Log.ui.info("Opening the todos tab because --show-todos was passed")
+                self.showTodos()
             }
         }
 
@@ -659,6 +678,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         model?.panelTab = .codes
         panel?.show()
         Task { [weak otpModel] in await otpModel?.refresh() }
+    }
+
+    func showTodos() {
+        model?.panelTab = .todos
+        panel?.show()
     }
 
     func confirmClearHistory() {

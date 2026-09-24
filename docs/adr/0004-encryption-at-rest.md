@@ -40,6 +40,10 @@ These columns stay readable, because they are what queries need without a key:
 `id`, `kind`, `created_at`, `last_used_at`, `use_count`, `pinned`, `sensitivity`,
 `expires_at`, `snippet_code`, and the embeddings table's `model` and `dimensions`.
 
+The todos table adds nothing to this list: it holds an `id` and a sealed body. A todo
+list is small enough to decrypt whole and sort in memory, so no column has to be
+queryable, and not even when a todo was written or finished is readable on disk.
+
 So an attacker with the file learns *that* you copied 4,000 things, when, how often you
 reused them, which were images, and which shortcodes you defined — but not a single word
 of what any of it said. That trade is deliberate and is the line to defend: anything that

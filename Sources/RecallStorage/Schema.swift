@@ -112,6 +112,16 @@ enum Schema {
         ALTER TABLE items ADD COLUMN pin_order INTEGER;
         CREATE INDEX items_pin_order ON items (pin_order) WHERE pin_order IS NOT NULL;
         """,
+
+        // v4 — todos. Nothing but the id is in the clear: the list is small enough to
+        // decrypt whole and sort in memory, so no column has to be queryable, and not
+        // even when a todo was made or finished leaves the disk readable.
+        """
+        CREATE TABLE todos (
+            id TEXT PRIMARY KEY NOT NULL,
+            body BLOB NOT NULL
+        );
+        """,
     ]
 
     /// Brings `database` up to the latest version.
